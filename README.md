@@ -50,7 +50,7 @@ Pengerasan lain:
 ## Jalankan
 
 ```bash
-git clone <repo> && cd gai-console
+git clone https://github.com/ade1256/google-ai-pro-farming-2-years.git && cd google-ai-pro-farming-2-years
 ./run.sh
 ```
 

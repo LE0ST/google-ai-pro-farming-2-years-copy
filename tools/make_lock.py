@@ -15,7 +15,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-ROOT = Path("/Users/ade1256/Documents/repositories/gai-console")
+ROOT = Path(__file__).resolve().parent.parent
 VENV = ROOT / ".venv"
 PY = VENV / "bin" / "python"
 WHEELHOUSE = ROOT / ".wheelhouse"

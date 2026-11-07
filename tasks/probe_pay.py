@@ -51,7 +51,7 @@ async def main() -> None:
                     continue
             print("BUTTONS:", await pay[0].evaluate(
                 "() => [...document.querySelectorAll('button,[role=button]')].map(b => (b.innerText||'').trim()).filter(Boolean).slice(0,10)"))
-        await page.screenshot(path="/Users/ade1256/.hermes/cache/scratch/pay5.png")
+        await page.screenshot(path=str(settings.artifacts_dir / "payment_methods.png"))
         await asyncio.sleep(2)
         await ctx.close()
 
