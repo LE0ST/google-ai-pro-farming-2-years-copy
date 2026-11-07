@@ -106,6 +106,12 @@ async def await_dialog(page: Page, seconds: int = 40) -> str:
         text = await frame_text(page)
         if not text:
             continue
+        # Local patch: through this VM's relay the unrendered eacquire frame
+        # can report its own inline script source (tens of KB) as body text,
+        # which false-matches the markers below. A rendered dialog is small;
+        # keep waiting instead of accepting raw source.
+        if len(text) > 20000:
+            continue
         if any(m in text.lower() for m in DIALOG_MARKERS):
             return text
         best = text
@@ -127,6 +133,32 @@ async def click_visible(page: Page, selector: str) -> bool:
     return False
 
 
+async def click_pro_discount(page: Page) -> bool:
+    """Local patch: this account's plans page labels the AI Pro CTA
+    "Get discount" (Annual view) instead of "Get started", and the generic
+    "Upgrade" selector only hits the sidebar nav. Click the discount button
+    that belongs to the Google AI Pro card specifically."""
+    js = """() => {
+      // Visible "Get discount" buttons run left->right: Storage, AI Plus,
+      // AI Pro. Ultra has no discount button, so the last visible one is
+      // the AI Pro card's. (Card headings are not ancestors of the button,
+      // so ancestry matching fails; geometry is the reliable key here.)
+      const btns = Array.from(document.querySelectorAll('button, a, [role="button"]'))
+        .filter((e) => {
+          const r = e.getBoundingClientRect();
+          return (e.innerText || '').trim() === 'Get discount' && r.width > 15 && r.height > 15;
+        })
+        .sort((a, b) => a.getBoundingClientRect().left - b.getBoundingClientRect().left);
+      if (!btns.length) return false;
+      btns[btns.length - 1].click();
+      return true;
+    }"""
+    try:
+        return bool(await page.evaluate(js))
+    except Exception:
+        return False
+
+
 async def open_dialog(page: Page, layer: int) -> str:
     """Navigate, arm, click the action. Retries once if nothing opens."""
     url = checkout.PLANS if layer == 1 else SETTINGS
@@ -146,10 +178,13 @@ async def open_dialog(page: Page, layer: int) -> str:
         await checkout.arm(page, layer, await checkout.capture_sub_id(page))
 
         clicked = False
-        for sel in sels:
-            if await click_visible(page, sel):
-                clicked = True
-                break
+        if layer == 1:
+            clicked = await click_pro_discount(page)
+        if not clicked:
+            for sel in sels:
+                if await click_visible(page, sel):
+                    clicked = True
+                    break
         if not clicked:
             say("DIALOG", f"tombol aksi tidak ada yang terlihat (percobaan {attempt + 1})")
             continue
@@ -590,16 +625,29 @@ async def detach_on_google(page: Page, last4: str) -> bool:
         await nav.goto(page, "https://play.google.com/store/paymentmethods")
         asked = saved = tried_edit = False
         absent = 0
+        # Halaman Play/payments mengikuti bahasa akun, bukan ?hl=en — akun
+        # Indonesia menampilkan label Indonesia. Semua pencocokan teks di sini
+        # dwibahasa; label tombol verifikasi pun dua varian ("Verify that
+        # it's you" di Play, "Verify it's you" di payments center).
         for _ in range(750):                      # ±300s, tanpa tunggu tetap
-            if await any_text(page, "sure that it's you"):
+            if await any_text(page, "sure that it's you") or \
+                    await any_text(page, "memastikan bahwa ini memang anda"):
                 # Re-auth hanya terkirim kalau tombolnya ditekan; kalau sesi sudah
                 # terverifikasi tombol ini memang tidak muncul lagi. Ini dicek lebih
                 # dulu karena selama verifikasi berjalan tidak ada yang bisa diklik.
-                if not asked and await click_text(page, 'text="Verify that it\'s you"'):
+                if not asked and (
+                    await click_text(page, 'text="Verify that it\'s you"')
+                    or await click_text(page, 'text="Verify it\'s you"')
+                    or await click_text(page, 'text="Verifikasi diri Anda"')
+                ):
                     asked = True
                     say("KARTU", "permintaan dikirim ke HP — setujui di sana (maks 300s)")
-            elif await any_text(page, "will be removed"):
-                if not saved and await click_text(page, 'text="Remove and save"'):
+            elif await any_text(page, "will be removed") or \
+                    await any_text(page, "akan dihapus"):
+                if not saved and (
+                    await click_text(page, 'text="Remove and save"')
+                    or await click_text(page, 'text="Hapus dan simpan"')
+                ):
                     saved = True
                     await asyncio.sleep(1.2)
                 if not await any_text(page, last4):
@@ -607,18 +655,24 @@ async def detach_on_google(page: Page, last4: str) -> bool:
             elif await any_text(page, last4):
                 absent = 0
                 if not saved:
-                    if await click_near(page, last4, 'text="Remove"', also="Remove"):
+                    if await click_near(page, last4, 'text="Remove"', also="Remove") or \
+                            await click_near(page, last4, 'text="Hapus"', also="Hapus"):
                         await asyncio.sleep(1.0)
-            elif await any_text(page, "Add a payment"):
+            elif await any_text(page, "Add a payment") or \
+                    await any_text(page, "Tambahkan metode pembayaran"):
                 # Daftar metode bayar sudah tampil (wallet maupun halaman Play) tapi
                 # kartunya tidak ada di situ — dengan nol kartu pun tautan edit hilang.
                 absent += 1
                 if absent >= 3:
                     say("KARTU", "kartu sudah tidak ada di akun")
                     return False
-            elif not tried_edit and await has_text(page, 'text="Edit payment methods"'):
+            elif not tried_edit and (
+                await has_text(page, 'text="Edit payment methods"')
+                or await has_text(page, 'text="Edit metode pembayaran"')
+            ):
                 tried_edit = True
                 await click_text(page, 'text="Edit payment methods"')
+                await click_text(page, 'text="Edit metode pembayaran"')
             await asyncio.sleep(0.4)
         say("KARTU", "verifikasi tidak selesai — kartu dilepas di vault saja")
         return False

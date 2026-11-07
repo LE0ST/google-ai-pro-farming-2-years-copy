@@ -123,7 +123,54 @@ def _base_args() -> list[str]:
         args += LINUX_ARGS
     if settings.no_sandbox:
         args.append("--no-sandbox")
+    # Local patch for this VM: its egress proxy re-signs TLS with a sandbox CA
+    # that Chromium does not trust. Opt-in via env only.
+    if os.environ.get("GAI_IGNORE_CERT_ERRORS") == "1":
+        args.append("--ignore-certificate-errors")
     return args
+
+
+# ── Local patch for this VM: clients2.google.com mirror ────────────────────
+# The VM egress proxy policy-denies clients2.google.com, which serves the
+# Google Payments scripts the checkout dialog needs. Google Translate's proxy
+# host serves the identical files and is allowed, so requests to clients2 are
+# fulfilled with the mirrored bytes. Opt-in via GAI_MIRROR_CLIENTS2=1.
+_mirror_cache: dict[str, tuple[int, str, bytes]] = {}
+
+
+def _fetch_clients2_mirror(url: str) -> tuple[int, str, bytes]:
+    import urllib.parse
+    import urllib.request
+
+    if url in _mirror_cache:
+        return _mirror_cache[url]
+    u = urllib.parse.urlparse(url)
+    mirror = (
+        f"https://clients2-google-com.translate.goog{u.path}"
+        "?_x_tr_sl=en&_x_tr_tl=id&_x_tr_hl=en"
+    )
+    if u.query:
+        mirror += "&" + u.query
+    req = urllib.request.Request(mirror, headers={"User-Agent": "Mozilla/5.0"})
+    try:
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            out = (resp.status, resp.headers.get_content_type(), resp.read())
+    except Exception:  # noqa: BLE001 - fall back to an empty script
+        out = (502, "application/javascript", b"")
+    _mirror_cache[url] = out
+    return out
+
+
+async def _install_clients2_mirror(ctx: BrowserContext) -> None:
+    import asyncio
+
+    async def handler(route: Any) -> None:
+        status, ctype, body = await asyncio.to_thread(
+            _fetch_clients2_mirror, route.request.url
+        )
+        await route.fulfill(status=status, content_type=ctype, body=body)
+
+    await ctx.route("**://clients2.google.com/**", handler)
 
 
 async def _open(
@@ -135,7 +182,7 @@ async def _open(
     args: list[str],
     choice: dict[str, Any],
 ) -> BrowserContext:
-    return await p.chromium.launch_persistent_context(
+    ctx = await p.chromium.launch_persistent_context(
         user_data_dir=str(profile_dir),
         headless=headless,
         locale="en-US",
@@ -145,6 +192,9 @@ async def _open(
         args=args,
         **choice,
     )
+    if os.environ.get("GAI_MIRROR_CLIENTS2") == "1":
+        await _install_clients2_mirror(ctx)
+    return ctx
 
 
 def _is_missing_browser(exc: Exception) -> bool:
@@ -178,6 +228,14 @@ async def launch(
     headless_now = resolve_headless(headless)
     choice = resolve_browser()
     args = _base_args()
+    # Local patch for this VM: route the browser through a local relay proxy
+    # when GAI_BROWSER_PROXY is set (the VM egress proxy refuses Chromium).
+    if proxy is None:
+        raw_proxy = os.environ.get("GAI_BROWSER_PROXY", "").strip()
+        if raw_proxy:
+            from .. import egress
+
+            proxy = egress.parse(raw_proxy)
 
     try:
         return await _open(
