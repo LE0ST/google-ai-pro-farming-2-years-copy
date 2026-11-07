@@ -61,7 +61,8 @@ if ! browser_present; then
 fi
 
 # ── lingkungan ──────────────────────────────────────────────────────────────
-export GAI_BIND_PORT="${PORT:-8765}"
+# PORT adalah nama pendeknya; GAI_BIND_PORT menang kalau keduanya diisi.
+export GAI_BIND_PORT="${GAI_BIND_PORT:-${PORT:-8765}}"
 
 if [ "$OS" = "Darwin" ]; then
   [ -x /usr/bin/security ] || say "peringatan: CLI security tidak ada — secret jatuh ke backend file"
