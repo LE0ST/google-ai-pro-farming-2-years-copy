@@ -12,9 +12,9 @@ from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from urllib.parse import quote
 
-from . import db, vault
+from . import db, secrets, vault
 from .config import settings
-from .runner import queue
+from .runner import browser, queue
 from .security import COOKIE_NAME, require_token
 
 log = logging.getLogger("gai")
@@ -40,6 +40,8 @@ async def lifespan(_: FastAPI) -> AsyncIterator[None]:
     token = settings.load_or_create_token()
     await db.migrate()
     queue.runner.start()
+    log.warning("secret backend: %s", secrets.describe())
+    log.warning("browser: %s", browser.describe())
     log.warning("console: http://%s:%d/?t=%s", settings.bind_host, settings.bind_port, token)
     yield
 
@@ -50,7 +52,13 @@ def create_app() -> FastAPI:
 
     @app.get("/healthz")
     async def healthz() -> JSONResponse:
-        return JSONResponse({"ok": True})
+        return JSONResponse(
+            {
+                "ok": True,
+                "secret_backend": secrets.backend(),
+                "browser": browser.describe(),
+            }
+        )
 
     @app.get("/", dependencies=guard)
     async def index(request: Request, msg: str = "", err: str = ""):

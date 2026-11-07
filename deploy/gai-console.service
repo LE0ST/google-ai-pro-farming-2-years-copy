@@ -1,0 +1,25 @@
+[Unit]
+Description=GaiConsole — konsol lokal otomasi AI Pro
+Documentation=https://github.com/danskiv/google-ai-pro-farming-2-years-copy
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=%h/google-ai-pro-farming-2-years-copy
+# PORT bebas dipilih; token dan data ikut ke ~/.local/share/GaiConsole.
+Environment=PORT=8765
+Environment=GAI_SECRET_BACKEND=auto
+# Server tanpa layar: biarkan headless. Di desktop, hapus baris berikut.
+Environment=GAI_HEADLESS=auto
+ExecStart=%h/google-ai-pro-farming-2-years-copy/run.sh
+Restart=on-failure
+RestartSec=5
+
+# Konsol ini menjalankan browser dan menulis profil; jangan pernah naikkan
+# batas ini tanpa alasan.
+NoNewPrivileges=yes
+PrivateTmp=yes
+
+[Install]
+WantedBy=default.target

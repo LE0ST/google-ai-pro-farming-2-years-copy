@@ -191,7 +191,7 @@
 <main>
   <section>
     <h2>Akun</h2>
-    <p class="hint">Tempel satu per baris: <code>email|password|secret-totp</code>. Seed disimpan di Keychain, yang tampil hanya kodenya.</p>
+    <p class="hint">Tempel satu per baris: <code>email|password|secret-totp</code>. Seed disimpan di vault (Keychain/Secret Service/file 0600), yang tampil hanya kodenya.</p>
     <form method="post" action="/accounts/import">
       <textarea name="blob" placeholder="nama@gmail.com|password|JBSWY3DPEHPK3PXP"></textarea>
       <div class="row"><button class="primary" type="submit">Impor</button></div>
@@ -261,7 +261,7 @@
 
   <section>
     <h2>Kartu</h2>
-    <p class="hint">Tempel satu per baris: <code>nomor|MM/YY|CVC</code>. Nomor &amp; CVC ke Keychain; yang tampil hanya 4 digit terakhir. Rotasi bergilir ke kartu aktif yang paling lama tidak dipakai.</p>
+    <p class="hint">Tempel satu per baris: <code>nomor|MM/YY|CVC</code>. Nomor &amp; CVC ke vault (Keychain/Secret Service/file 0600); yang tampil hanya 4 digit terakhir. Rotasi bergilir ke kartu aktif yang paling lama tidak dipakai.</p>
     <form method="post" action="/cards/import">
       <textarea name="blob" placeholder="4111111111111111|08/29|123"></textarea>
       <div class="row"><button class="primary" type="submit">Impor</button></div>
