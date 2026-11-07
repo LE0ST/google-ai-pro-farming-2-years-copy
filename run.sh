@@ -16,7 +16,9 @@ if [ ! -x .venv/bin/python ]; then
   .venv/bin/python -m pip install --require-hashes -r requirements.lock
 fi
 
+export GAI_BIND_PORT="${PORT:-8765}"
+
 [ -d "/Applications/Google Chrome.app" ] || echo "peringatan: Google Chrome tidak ada di /Applications — login akan gagal" >&2
 [ -x /usr/bin/security ] || echo "peringatan: CLI security tidak ada — secret tidak bisa disimpan" >&2
 
-exec .venv/bin/python -m uvicorn app.main:app --host 127.0.0.1 --port "${PORT:-8765}" --log-level warning
+exec .venv/bin/python -m uvicorn app.main:app --host 127.0.0.1 --port "$GAI_BIND_PORT" --log-level warning
