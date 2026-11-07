@@ -242,7 +242,8 @@ memastikan secret benar-benar di keyring dan bukan di file.
 | `token required` (401) | ambil `?t=` dari `console.token` (lokasi di tabel atas) atau dari log boot |
 | dialog checkout “Loading…” terus | `clients2.google.com` diblokir egress — aktifkan `GAI_MIRROR_CLIENTS2=1` (bagian Egress terbatas) |
 | halaman paket hanya berisi tombol “Get discount” | varian halaman baru; alur sudah menekan tombol “Get discount” paling kanan (kartu Google AI Pro) untuk layer 1 |
-| simpan kartu berhenti, dialog tidak kembali | kemungkinan reCAPTCHA di langkah Save card. Ulangi run (profil yang sama sering lolos tanpa tantangan), atau awasi run-nya dan selesaikan tantangannya di jendela browser |
+| simpan kartu berhenti, dialog tidak kembali | kemungkinan reCAPTCHA di langkah Save card. Ulangi run (profil yang sama sering lolos tanpa tantangan), atau awasi run-nya dan selesaikan tantangannya di jendela browser. Tantangannya bisa multi-ronde (gambar berganti tiap ronde) — jawab sampai tuntas |
+| lepas kartu macet, tidak ada tombol yang ditekan | halaman pembayaran mengikuti bahasa akun (mis. Indonesia: “Edit metode pembayaran”, “Verifikasi diri Anda”); pencocokan teks pelepasan kartu sudah dwibahasa (EN+ID) |
 | login `signin/rejected` | Google menolak mode headless — pakai headed: `GAI_HEADLESS=0` + Xvfb di server |
 
 ## Cara pakai

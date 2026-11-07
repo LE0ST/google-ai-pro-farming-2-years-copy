@@ -625,16 +625,29 @@ async def detach_on_google(page: Page, last4: str) -> bool:
         await nav.goto(page, "https://play.google.com/store/paymentmethods")
         asked = saved = tried_edit = False
         absent = 0
+        # Halaman Play/payments mengikuti bahasa akun, bukan ?hl=en — akun
+        # Indonesia menampilkan label Indonesia. Semua pencocokan teks di sini
+        # dwibahasa; label tombol verifikasi pun dua varian ("Verify that
+        # it's you" di Play, "Verify it's you" di payments center).
         for _ in range(750):                      # ±300s, tanpa tunggu tetap
-            if await any_text(page, "sure that it's you"):
+            if await any_text(page, "sure that it's you") or \
+                    await any_text(page, "memastikan bahwa ini memang anda"):
                 # Re-auth hanya terkirim kalau tombolnya ditekan; kalau sesi sudah
                 # terverifikasi tombol ini memang tidak muncul lagi. Ini dicek lebih
                 # dulu karena selama verifikasi berjalan tidak ada yang bisa diklik.
-                if not asked and await click_text(page, 'text="Verify that it\'s you"'):
+                if not asked and (
+                    await click_text(page, 'text="Verify that it\'s you"')
+                    or await click_text(page, 'text="Verify it\'s you"')
+                    or await click_text(page, 'text="Verifikasi diri Anda"')
+                ):
                     asked = True
                     say("KARTU", "permintaan dikirim ke HP — setujui di sana (maks 300s)")
-            elif await any_text(page, "will be removed"):
-                if not saved and await click_text(page, 'text="Remove and save"'):
+            elif await any_text(page, "will be removed") or \
+                    await any_text(page, "akan dihapus"):
+                if not saved and (
+                    await click_text(page, 'text="Remove and save"')
+                    or await click_text(page, 'text="Hapus dan simpan"')
+                ):
                     saved = True
                     await asyncio.sleep(1.2)
                 if not await any_text(page, last4):
@@ -642,18 +655,24 @@ async def detach_on_google(page: Page, last4: str) -> bool:
             elif await any_text(page, last4):
                 absent = 0
                 if not saved:
-                    if await click_near(page, last4, 'text="Remove"', also="Remove"):
+                    if await click_near(page, last4, 'text="Remove"', also="Remove") or \
+                            await click_near(page, last4, 'text="Hapus"', also="Hapus"):
                         await asyncio.sleep(1.0)
-            elif await any_text(page, "Add a payment"):
+            elif await any_text(page, "Add a payment") or \
+                    await any_text(page, "Tambahkan metode pembayaran"):
                 # Daftar metode bayar sudah tampil (wallet maupun halaman Play) tapi
                 # kartunya tidak ada di situ — dengan nol kartu pun tautan edit hilang.
                 absent += 1
                 if absent >= 3:
                     say("KARTU", "kartu sudah tidak ada di akun")
                     return False
-            elif not tried_edit and await has_text(page, 'text="Edit payment methods"'):
+            elif not tried_edit and (
+                await has_text(page, 'text="Edit payment methods"')
+                or await has_text(page, 'text="Edit metode pembayaran"')
+            ):
                 tried_edit = True
                 await click_text(page, 'text="Edit payment methods"')
+                await click_text(page, 'text="Edit metode pembayaran"')
             await asyncio.sleep(0.4)
         say("KARTU", "verifikasi tidak selesai — kartu dilepas di vault saja")
         return False
