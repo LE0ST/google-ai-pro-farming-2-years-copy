@@ -24,6 +24,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import subprocess
 import sys
 import urllib.error
@@ -54,6 +55,16 @@ def _wanted(filename: str) -> bool:
     return "manylinux" in filename or "musllinux" in filename or "macosx" in filename
 
 
+def _canon(name: str) -> str:
+    """One canonical spelling, whichever source the pins came from.
+
+    `pip list --freeze` prints `Jinja2` and `annotated-doc`; a lock parsed from
+    disk keeps whatever the last writer used. Normalising to the
+    lowercase/underscore form keeps regeneration from churning the file.
+    """
+    return re.sub(r"[-_.]+", "_", name.strip()).lower()
+
+
 def _pins_from_venv() -> list[tuple[str, str]]:
     if not VENV_PY.exists():
         raise SystemExit(f"no venv at {VENV_PY} — create it first, or use --from-lock")
@@ -68,7 +79,7 @@ def _pins_from_venv() -> list[tuple[str, str]]:
         if "==" not in line or line.startswith("pip=="):
             continue
         name, _, version = line.partition("==")
-        out.append((name.strip(), version.strip()))
+        out.append((_canon(name), version.strip()))
     return out
 
 
@@ -81,7 +92,7 @@ def _pins_from_lock() -> list[tuple[str, str]]:
         if not line or line.startswith("#") or "==" not in line:
             continue
         name, _, rest = line.partition("==")
-        out.append((name.strip(), rest.split()[0]))
+        out.append((_canon(name), rest.split()[0]))
     return out
 
 
