@@ -3,10 +3,16 @@
 from __future__ import annotations
 
 import asyncio
+import os
 import sys
+import tempfile
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
+# Jangan sentuh data asli: uji jalan di direktori sementara.
+_TMP = Path(tempfile.mkdtemp(prefix="gai-selftest-"))
+os.environ["GAI_DATA_DIR"] = str(_TMP)
 
 from app import db, secrets, totp  # noqa: E402
 from app.models import AccountCreate  # noqa: E402
