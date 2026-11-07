@@ -155,6 +155,9 @@ Semua variabel ber-prefix `GAI_` dibaca `app/config.py`; `PORT` dan
 | `GAI_BROWSER_EXECUTABLE` | path biner browser tertentu, mis. snap Chromium |
 | `GAI_HEADLESS` | `auto` (default) / `1` / `0` |
 | `GAI_NO_SANDBOX` | `1` kalau Chromium tidak bisa memakai sandbox (container) |
+| `GAI_BROWSER_PROXY` | `host:port` atau `http://user:pass@host:port` — proxy khusus Chromium (egress terbatas, lihat bagian berikutnya) |
+| `GAI_IGNORE_CERT_ERRORS` | `1` kalau proxy egress menandatangani ulang TLS dengan CA sendiri |
+| `GAI_MIRROR_CLIENTS2` | `1` kalau egress memblokir `clients2.google.com` — script pembayaran diambil dari mirror host Google Translate |
 | `GAI_MAX_CONCURRENT` | jumlah run paralel (default 1 — jangan dinaikkan tanpa ukur) |
 | `GAI_RUN_TIMEOUT` | batas detik satu run (default 900) |
 | `GAI_SKIP_BROWSER_INSTALL` | `1` untuk melarang `run.sh` mengunduh Chromium |
@@ -172,6 +175,46 @@ dengan peringatan di log, bukan crash. Untuk memaksa headed: `GAI_HEADLESS=0`
 Backend secret yang dipilih eksplisit tetapi tidak bisa dipakai akan **gagal
 keras** saat menulis (`RuntimeError: secret-tool write failed…`), bukan menurun
 diam-diam ke file — supaya tidak ada kesan proteksi yang keliru.
+
+## Egress terbatas (VM / sandbox / proxy perusahaan)
+
+Sebagian VM dan sandbox mengarahkan semua trafik keluar lewat satu proxy HTTP
+dengan kebijakan sendiri. Tiga gejala khasnya, dan obatnya:
+
+1. **Chromium tidak bisa membuka halaman apa pun** (`ERR_SSL_PROTOCOL_ERROR`,
+   atau CONNECT tunnel ditolak 403) sementara `curl` normal. Proxy semacam itu
+   sering hanya menerima klien tertentu. Jalankan relay lokal kecil yang
+   membuka CONNECT dari proses biasa lalu meneruskannya, dan arahkan hanya
+   Chromium ke relay itu:
+
+   ```
+   GAI_BROWSER_PROXY=127.0.0.1:18080
+   ```
+
+2. **Sertifikat ditolak di semua situs.** Proxy menandatangani ulang TLS
+   dengan CA internal yang tidak dikenal Chromium:
+
+   ```
+   GAI_IGNORE_CERT_ERRORS=1
+   ```
+
+3. **Dialog checkout berputar di “Loading…” selamanya.** Cek log jaringan:
+   `clients2.google.com` gagal (`ERR_TUNNEL_CONNECTION_FAILED` / 403
+   `policy_denied`). Host itu menyajikan script Google Payments
+   (`gr/gr_sync.js`, `gr/gr_full_*.js`) yang wajib dimuat dialog. File yang
+   sama persis disajikan publik oleh host proxy Google Translate
+   (`clients2-google-com.translate.goog`), jadi mode mirror mengambil
+   byte-nya dari sana dan memberikannya ke dialog:
+
+   ```
+   GAI_MIRROR_CLIENTS2=1
+   ```
+
+Ketiganya opt-in dan tidak mengubah apa pun bila tidak diisi. Kombinasi yang
+terbukti di VM headless: relay lokal + `GAI_BROWSER_PROXY` +
+`GAI_IGNORE_CERT_ERRORS=1` + `GAI_MIRROR_CLIENTS2=1` + browser **headed** di
+Xvfb (`DISPLAY=:99`, `GAI_HEADLESS=0`) — mode headless ditolak Google di
+langkah login (`signin/rejected`).
 
 ## Verifikasi
 
@@ -197,6 +240,10 @@ memastikan secret benar-benar di keyring dan bukan di file.
 | `No usable sandbox!` / `clone3` | container tanpa user namespace: `GAI_NO_SANDBOX=1 ./run.sh` |
 | browser mati saat buka banyak tab | `/dev/shm` kecil — sudah ditangani `--disable-dev-shm-usage` di Linux |
 | `token required` (401) | ambil `?t=` dari `console.token` (lokasi di tabel atas) atau dari log boot |
+| dialog checkout “Loading…” terus | `clients2.google.com` diblokir egress — aktifkan `GAI_MIRROR_CLIENTS2=1` (bagian Egress terbatas) |
+| halaman paket hanya berisi tombol “Get discount” | varian halaman baru; alur sudah menekan tombol “Get discount” paling kanan (kartu Google AI Pro) untuk layer 1 |
+| simpan kartu berhenti, dialog tidak kembali | kemungkinan reCAPTCHA di langkah Save card. Ulangi run (profil yang sama sering lolos tanpa tantangan), atau awasi run-nya dan selesaikan tantangannya di jendela browser |
+| login `signin/rejected` | Google menolak mode headless — pakai headed: `GAI_HEADLESS=0` + Xvfb di server |
 
 ## Cara pakai
 
