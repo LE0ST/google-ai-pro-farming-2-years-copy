@@ -1,1 +1,236 @@
-IiIiTW9uZXkgZ3VhcmQuIEZhaWwgY2xvc2VkOiBubyByZWFkYWJsZSB6ZXJvIG1lYW5zIGRvIG5vdCBjbGljay4KClRoZSBndWFyZCBpcyB0aGUgb25seSB0aGluZyBzdGFuZGluZyBiZXR3ZWVuIGEgYnJva2VuIHRva2VuIGFuZCBhIHJlYWwgY2hhcmdlLApzbyBhbiB1bnJlYWRhYmxlIHRvdGFsIGlzIHRyZWF0ZWQgYXMgIm5vdCBmcmVlIiwgbmV2ZXIgYXMgInByb2JhYmx5IGZyZWUiLgoKSnVkZ2VtZW50IGlzIHNjb3BlZCB0byAqdG9kYXkncyogY2hhcmdlLiBBIHRyaWFsIGRpYWxvZyBsZWdpdGltYXRlbHkgbWVudGlvbnMKbW9uZXkgdGhhdCBpcyBub3QgZHVlIHRvZGF5ICgidGhlbiAkMTkuOTkvbW9udGgsIHN0YXJ0aW5nIDxkYXRlPiIpLCBzbyBhIGJhcmUKImFueSAkMC4wMCBhbnl3aGVyZSIgdGVzdCBpcyBub3QgZW5vdWdoIGVpdGhlciB3YXk6IGl0IHVzZWQgdG8gcGFzcyBhIGRpYWxvZwp0aGF0IGNoYXJnZWQgJDE5OS45OSB0b2RheSBuZXh0IHRvIGEgJDAuMDAgdGF4IGxpbmUuIEFtb3VudHMgYW5jaG9yZWQgdG8gYQpkdWUtdG9kYXkgbGFiZWwgZGVjaWRlIGZpcnN0LiBVbmFuY2hvcmVkIG5vbi16ZXJvIGFtb3VudHMgdGhlbiBwYXNzIGluIHR3bwp0aWVycyBvZiBldmlkZW5jZTogd2hlbiB0aGUgZGlhbG9nIGl0c2VsZiBzaG93cyB0b2RheSBpcyBmcmVlIChhIHplcm8gYW1vdW50LApvciBhIGZyZWUvdHJpYWwgd29yZCksIGl0IGlzIGVub3VnaCB0aGF0IGV2ZXJ5IHByaWNlIGlzIGZ1dHVyZS1zY29wZWQ7IHdpdGgKbm8gc3VjaCBldmlkZW5jZSAodGhlICJVcGNvbWluZyBjaGFyZ2VzIiBzaGFwZSBvZiBsYXllcnMgMi00KSBldmVyeSBwcmljZQptdXN0IGJlIHByZWNlZGVkIGJ5IGFuIGV4cGxpY2l0IHN0YXJ0IG1hcmtlciAoInN0YXJ0aW5nIiwgInRoZW4iLCAiYWZ0ZXIiKS4KQSBiYXJlIGJpbGxpbmcgcGVyaW9kIGlzIG5vdCBhIGRlZmVycmFsOiAiJDE5Ljk5L21vbnRoIMK3IEJpbGxlZCBtb250aGx5IiBpcwphIHBhaWQgZGlhbG9nIGFuZCBmYWlscy4KCk9uZSBkaWFsb2cgc2hhcGUgbmVlZHMgYSBpdGVtaXNhdGlvbiBydWxlOiBpbiB0aGUgbGF5ZXJzIDItNCAiVXBjb21pbmcKY2hhcmdlcyIgZGlhbG9nIHRoZSBwZXItcHJvZHVjdCBwcmljZXMgKCJHb29nbGUgQUkgUHJvICQxOS45OSIsICJZb3VUdWJlClByZW1pdW0gJDExLjk5IikgYXJlIHByaW50ZWQgKmFmdGVyKiB0aGUgY29tYmluZWQgZnV0dXJlIHRvdGFsIHRoZXkgYmVsb25nCnRvICgiU3RhcnRpbmcgTWF5IDgsIDIwMjggJDMxLjk4L21vbnRoIiksIHRvbyBmYXIgZnJvbSBhbnkgc3RhcnQgbWFya2VyIHRvCnBhc3MgdGhlIHNjb3BpbmcgdGVzdHMgb24gdGhlaXIgb3duLiBTdWNoIGFuIGFtb3VudCBjb3VudHMgYXMgZnV0dXJlLXNjb3BlZApvbmx5IHdoZW4gaXQgaXMgcGFydCBvZiBhbiBleGFjdCBpdGVtaXNhdGlvbjogYXQgbGVhc3QgdHdvIHVuZXhwbGFpbmVkCmFtb3VudHMgZGlyZWN0bHkgZm9sbG93aW5nIGEgc2NvcGVkIHRvdGFsIGFuZCBzdW1taW5nIHRvIGl0IHRvIHRoZSBjZW50LAp3aXRoIG5vIG90aGVyIHVuZXhwbGFpbmVkIG1vbmV5IGFmdGVyIHRoZW0uIEFueXRoaW5nIGVsc2Ugc3RpbGwgZmFpbHMuCiIiIgoKZnJvbSBfX2Z1dHVyZV9fIGltcG9ydCBhbm5vdGF0aW9ucwoKaW1wb3J0IHJlCgpNT05FWSA9IHJlLmNvbXBpbGUociIoPzpVU1xzP1wkfFVTRHxcJHxScFwuP3zigqwpXHM/W1xkLixdKyIsIHJlLklHTk9SRUNBU0UpClpFUk8gPSByZS5jb21waWxlKHIiKD86VVNccz9cJHxVU0R8XCR8UnBcLj984oKsKVxzPzAoPzpbLixdMDApP1xiIiwgcmUuSUdOT1JFQ0FTRSkKRlJFRV9XT1JEID0gcmUuY29tcGlsZShyIlxiKGZyZWV8Z3JhdGlzKVxifFxiMFxzPyV8XGJ0cmlhbFxiIiwgcmUuSUdOT1JFQ0FTRSkKCiMgTGFiZWwgeWFuZyBtZW5hbWJhdGthbiBub21pbmFsIGtlIHRhZ2loYW4gKmhhcmkgaW5pKjogIkR1ZSB0b2RheSAkMC4wMCIsCiMgIiQwLjAwIGR1ZSB0b2RheSIsICJUb3RhbCB0b2RheSDigKYiLCAidGFnaWhhbiBoYXJpIGluaSDigKYiLgpUT0RBWV9MQUJFTCA9IHJlLmNvbXBpbGUoCiAgICByIihkdWVccyt0b2RheXx0b3RhbFxzK3RvZGF5fGNoYXJnZWRccyt0b2RheXxwYXlccyt0b2RheXxhbW91bnRccytkdWV8IgogICAgciJ0b2RheSc/c1xzKyg/OnRvdGFsfGNoYXJnZSl8dG90YWxccytkdWV8dGFnaWhhblxzK2hhcmlccytpbmkpIiwKICAgIHJlLklHTk9SRUNBU0UsCikKIyBLb250ZWtzIHlhbmcgbWVtYnVhdCBub21pbmFsIGJ1a2FuLW5vbCBqZWxhcyBoYXJnYSBtYXNhIGRlcGFuLCBidWthbiB0YWdpaGFuCiMgaGFyaSBpbmk6IHRhcmlmIGJlcmthbGEsIHRhbmdnYWwgbXVsYWksIHBlcnBhbmphbmdhbi4KX0ZVVFVSRV9ISU5UID0gcmUuY29tcGlsZSgKICAgIHIiL1xzPyg/Om1vbnRofG1vfHllYXJ8eXIpXGJ8cGVyXHMrKD86bW9udGh8eWVhcil8c3RhcnRpbmd8c3RhcnRzXHMrb258IgogICAgciJ0aGVuXGJ8YWZ0ZXJccysoPzp0aGVccyspPyg/OnRyaWFsfGZyZWUpfHJlbmV3c3xyZW5ld2FsfG11bGFpXHMrdGFuZ2dhbCIsCiAgICByZS5JR05PUkVDQVNFLAopCiMgUGVuYW5kYSBtdWxhaSBtYXNhIGRlcGFuIHlhbmcgKmVrc3BsaXNpdCo6IG5vbWluYWwgeWFuZyBkaWRhaHVsdWkga2F0YSBpbmkKIyBiZWx1bSBkaXRhZ2loIGthcmVuYSBtYXNhIGhhcmdhbnlhIGJlbHVtIG11bGFpICgiU3RhcnRpbmcgTWF5IDgsIDIwMjcKIyAkMTMuOTkiKS4gTGViaWgga2V0YXQgZGFyaSBfRlVUVVJFX0hJTlQ6IHNhdHVhbiBiZXJrYWxhICgvbW9udGgsIC95ZWFyKQojIGRhbiAicmVuZXdzIiB0aWRhayB0ZXJtYXN1ayDigJQgaXR1IHNpa2x1cyB0YWdpaGFuIGJpYXNhLCBidWthbiBwZW51bmRhYW4uCl9TVEFSVF9ISU5UID0gcmUuY29tcGlsZSgKICAgIHIic3RhcnRpbmd8c3RhcnRzXHMrb258dGhlblxifGFmdGVyXGJ8bXVsYWlccyt0YW5nZ2FsIiwKICAgIHJlLklHTk9SRUNBU0UsCikKIyAiWW91IHdvbid0IGJlIGNoYXJnZWQgdG9kYXkiIGFkYWxhaCBqYW5qaSAqdGlkYWsqIG1lbmFnaWg7IGxhYmVsIGRpCiMgYmVsYWthbmcgbmVnYXNpIHNlcGVydGkgaW5pIHRpZGFrIG1lbmFtYmF0a2FuIG5vbWluYWwgYXBhIHB1bi4KX05FR0FURUQgPSByZS5jb21waWxlKHIiKD86d29uJz90fHdpbGxccytub3R8bmV2ZXJ8bm90KVxzK2JlXHMqJHxub1xzK2NoYXJnZVxzKiQiLCByZS5JR05PUkVDQVNFKQojICJUb2RheSAkMC4wMCI6IGthdGEgdG9kYXkgdGVsYW5qYW5nIHRlcGF0IHNlYmVsdW0gbm9taW5hbCBqdWdhIG1lbmFtYmF0a2FuCiMgbm9taW5hbCBpdHUga2UgaGFyaSBpbmksIHdhbGF1IHRhbnBhIGxhYmVsICJkdWUvdG90YWwiIGRpIGRlcGFubnlhLgpfVE9EQVlfV09SRCA9IHJlLmNvbXBpbGUociJcYnRvZGF5XGIiLCByZS5JR05PUkVDQVNFKQojIFRhcGkgdG9kYXkgeWFuZyBkaWRhaHVsdWkgcGVuYW5kYSByZW50YW5nIGJ1a2FuIGxhYmVsIHRhZ2loYW46IHBhZGEKIyAic3RhcnRpbmcgdG9kYXkg4oCmIiAvICJmcmVlIHVudGlsIHRvZGF5IiBrYXRhIGl0dSBtZW5hbmRhaSBrYXBhbiBoYXJnYQojIGJlcmthbGEgbXVsYWkvYmVyYWtoaXIsIGJ1a2FuIHRhZ2loYW4gaGFyaSBpbmkuCl9CQVJFX1NLSVAgPSByZS5jb21waWxlKHIiKD86c3RhcnRpbmd8dW50aWwpXHMqJCIsIHJlLklHTk9SRUNBU0UpCgoKY2xhc3MgVmVyZGljdDoKICAgIF9fc2xvdHNfXyA9ICgic2FmZSIsICJhbW91bnRzIiwgInJlYXNvbiIpCgogICAgZGVmIF9faW5pdF9fKHNlbGYsIHNhZmU6IGJvb2wsIGFtb3VudHM6IGxpc3Rbc3RyXSwgcmVhc29uOiBzdHIpIC0+IE5vbmU6CiAgICAgICAgc2VsZi5zYWZlID0gc2FmZQogICAgICAgIHNlbGYuYW1vdW50cyA9IGFtb3VudHMKICAgICAgICBzZWxmLnJlYXNvbiA9IHJlYXNvbgoKICAgIGRlZiBfX3JlcHJfXyhzZWxmKSAtPiBzdHI6CiAgICAgICAgcmV0dXJuIGYiVmVyZGljdChzYWZlPXtzZWxmLnNhZmV9LCBhbW91bnRzPXtzZWxmLmFtb3VudHN9LCByZWFzb249e3NlbGYucmVhc29uIXJ9KSIKCgpkZWYgX2lzX3plcm8ocmF3OiBzdHIpIC0+IGJvb2w6CiAgICAiIiJUcnVlIHdoZW4gZXZlcnkgZGlnaXQgb2YgdGhlIGFtb3VudCBpcyAwICgiJDAuMDAiLCAiUnAwIiwgIiQwLDAwIikuIiIiCiAgICBkaWdpdHMgPSByZS5zdWIociJcRCIsICIiLCByYXcpCiAgICByZXR1cm4gYm9vbChkaWdpdHMpIGFuZCBzZXQoZGlnaXRzKSA9PSB7IjAifQoKCmRlZiBfdG9kYXlfYW1vdW50cyhmbGF0OiBzdHIsIGhpdHM6IGxpc3RbdHVwbGVbaW50LCBpbnQsIHN0cl1dKSAtPiBsaXN0W3N0cl06CiAgICAiIiJBbW91bnRzIGFuY2hvcmVkIHRvIGEgZHVlLXRvZGF5IGxhYmVsOiB0aGUgbmVhcmVzdCBvbmUgb24gZWl0aGVyIHNpZGUuCgogICAgT25seSB0aGUgbmVhcmVzdCBhbW91bnQgY291bnRzIOKAlCBpbiBmbGF0dGVuZWQgZGlhbG9nIHRleHQgdGhlIG5leHQgbGluZQogICAgKCJ0aGVuICQxOS45OS9tb250aCIpIGZvbGxvd3Mgd2l0aGluIGEgZmV3IGRvemVuIGNoYXJhY3RlcnMgYW5kIG11c3Qgbm90CiAgICBiZSBtaXN0YWtlbiBmb3IgdG9kYXkncyB0b3RhbC4KICAgICIiIgogICAgZm91bmQ6IGxpc3Rbc3RyXSA9IFtdCiAgICBsYWJlbF9zcGFuczogbGlzdFt0dXBsZVtpbnQsIGludF1dID0gW10KICAgIGZvciBsYWJlbCBpbiBUT0RBWV9MQUJFTC5maW5kaXRlcihmbGF0KToKICAgICAgICBsYWJlbF9zcGFucy5hcHBlbmQoKGxhYmVsLnN0YXJ0KCksIGxhYmVsLmVuZCgpKSkKICAgICAgICBpZiBfTkVHQVRFRC5zZWFyY2goZmxhdFttYXgoMCwgbGFiZWwuc3RhcnQoKSAtIDMwKTpsYWJlbC5zdGFydCgpXSk6CiAgICAgICAgICAgIGNvbnRpbnVlCiAgICAgICAgYWZ0ZXIgPSBbaCBmb3IgaCBpbiBoaXRzIGlmIGxhYmVsLmVuZCgpIDw9IGhbMF0gPD0gbGFiZWwuZW5kKCkgKyA0OF0KICAgICAgICBpZiBhZnRlcjoKICAgICAgICAgICAgZm91bmQuYXBwZW5kKGFmdGVyWzBdWzJdKQogICAgICAgIGJlZm9yZSA9IFtoIGZvciBoIGluIGhpdHMgaWYgbGFiZWwuc3RhcnQoKSAtIDI0IDw9IGhbMV0gPD0gbGFiZWwuc3RhcnQoKV0KICAgICAgICBpZiBiZWZvcmU6CiAgICAgICAgICAgIGZvdW5kLmFwcGVuZChiZWZvcmVbLTFdWzJdKQogICAgIyAiVG9kYXkgJFgiOiB0b2RheSB0ZWxhbmphbmcgbWVuYW1iYXRrYW4gbm9taW5hbCB0ZXJkZWthdCBzZXN1ZGFobnlhLgogICAgIyBMZXdhdGkgdG9kYXkgeWFuZyBzdWRhaCBqYWRpIGJhZ2lhbiBsYWJlbCBkaSBhdGFzIChzdWRhaCBkaWhpdHVuZykKICAgICMgZGFuIHlhbmcgZGlkYWh1bHVpIHBlbmFuZGEgcmVudGFuZyAoInN0YXJ0aW5nIi8idW50aWwiKS4KICAgIGZvciB3b3JkIGluIF9UT0RBWV9XT1JELmZpbmRpdGVyKGZsYXQpOgogICAgICAgIGlmIGFueShzdGFydCA8PSB3b3JkLnN0YXJ0KCkgPCBlbmQgZm9yIHN0YXJ0LCBlbmQgaW4gbGFiZWxfc3BhbnMpOgogICAgICAgICAgICBjb250aW51ZQogICAgICAgIGlmIF9CQVJFX1NLSVAuc2VhcmNoKGZsYXRbbWF4KDAsIHdvcmQuc3RhcnQoKSAtIDMwKTp3b3JkLnN0YXJ0KCldKToKICAgICAgICAgICAgY29udGludWUKICAgICAgICBhZnRlciA9IFtoIGZvciBoIGluIGhpdHMgaWYgd29yZC5lbmQoKSA8PSBoWzBdIDw9IHdvcmQuZW5kKCkgKyAyNF0KICAgICAgICBpZiBhZnRlcjoKICAgICAgICAgICAgZm91bmQuYXBwZW5kKGFmdGVyWzBdWzJdKQogICAgcmV0dXJuIGZvdW5kCgoKZGVmIF9mdXR1cmVfc2NvcGVkKGZsYXQ6IHN0ciwgaGl0OiB0dXBsZVtpbnQsIGludCwgc3RyXSkgLT4gYm9vbDoKICAgIHN0YXJ0LCBlbmQsIF9yYXcgPSBoaXQKICAgIHJldHVybiBib29sKF9GVVRVUkVfSElOVC5zZWFyY2goZmxhdFttYXgoMCwgc3RhcnQgLSA0OCk6ZW5kICsgNDhdKSkKCgpkZWYgX3N0YXJ0X3Njb3BlZChmbGF0OiBzdHIsIGhpdDogdHVwbGVbaW50LCBpbnQsIHN0cl0pIC0+IGJvb2w6CiAgICAiIiJUcnVlIHdoZW4gYW4gZXhwbGljaXQgc3RhcnQgbWFya2VyIHByZWNlZGVzIHRoZSBhbW91bnQuCgogICAgT25seSB0aGUgdGV4dCAqYmVmb3JlKiB0aGUgYW1vdW50IGNvdW50czogdGhlIG1hcmtlciBhbm5vdW5jZXMgd2hlbgogICAgdGhpcyBwcmljZSBiZWdpbnMsIHNvIGl0IHN0YW5kcyBpbiBmcm9udCBvZiBpdCAoIlN0YXJ0aW5nIE1heSA4LCAyMDI3CiAgICAkMTMuOTkvbW9udGgiKS4gQSBtYXJrZXIgYWZ0ZXIgdGhlIGFtb3VudCBkZXNjcmliZXMgc29tZXRoaW5nIGVsc2UuCiAgICAiIiIKICAgIHN0YXJ0LCBfZW5kLCBfcmF3ID0gaGl0CiAgICByZXR1cm4gYm9vbChfU1RBUlRfSElOVC5zZWFyY2goZmxhdFttYXgoMCwgc3RhcnQgLSA2NCk6c3RhcnRdKSkKCgpkZWYgX3ZhbHVlKHJhdzogc3RyKSAtPiBpbnQgfCBOb25lOgogICAgIiIiUGFyc2UgYSBtb25leSBzdHJpbmcgdG8gY2VudHM7IE5vbmUgd2hlbiB0aGUgc2hhcGUgaXMgdW5yZWNvZ25pc2VkLgoKICAgIEhhbmRsZXMgdGhlIGZvcm1hdHMgdGhlIGRpYWxvZ3MgYWN0dWFsbHkgdXNlOiAiJDMxLjk4IiwgIiQxLDI5OS4wMCIKICAgIChjb21tYSA9IHRob3VzYW5kcykgYW5kICIwLDAwIiAoY29tbWEgPSBkZWNpbWFsKS4gQW55dGhpbmcgZXhvdGljCiAgICByZXR1cm5zIE5vbmUgc28gdGhlIGl0ZW1pc2F0aW9uIHJ1bGUgc2ltcGx5IGRvZXMgbm90IGFwcGx5LgogICAgIiIiCiAgICB0b2tlbiA9IHJlLnNlYXJjaChyIltcZF1bXGQuLF0qIiwgcmF3KQogICAgaWYgbm90IHRva2VuOgogICAgICAgIHJldHVybiBOb25lCiAgICBudW0gPSB0b2tlbi5ncm91cCgwKS5yc3RyaXAoIi4sIikKICAgIGlmIHJlLmZ1bGxtYXRjaChyIlxkezEsM30oLFxkezN9KSsoXC5cZHsxLDJ9KT8iLCBudW0pOgogICAgICAgIG51bSA9IG51bS5yZXBsYWNlKCIsIiwgIiIpCiAgICBlbGlmIHJlLmZ1bGxtYXRjaChyIlxkKyxcZHsxLDJ9IiwgbnVtKToKICAgICAgICBudW0gPSBudW0ucmVwbGFjZSgiLCIsICIuIikKICAgIGVsaWYgbm90IHJlLmZ1bGxtYXRjaChyIlxkKyhcLlxkezEsMn0pPyIsIG51bSk6CiAgICAgICAgcmV0dXJuIE5vbmUKICAgIHRyeToKICAgICAgICByZXR1cm4gcm91bmQoZmxvYXQobnVtKSAqIDEwMCkKICAgIGV4Y2VwdCBWYWx1ZUVycm9yOgogICAgICAgIHJldHVybiBOb25lCgoKZGVmIF9jb21wb25lbnRzX2V4cGxhaW4oCiAgICBoaXRzOiBsaXN0W3R1cGxlW2ludCwgaW50LCBzdHJdXSwgc2NvcGVkOiBsaXN0W2Jvb2xdCikgLT4gYm9vbDoKICAgICIiIlRydWUgd2hlbiBldmVyeSB1bmV4cGxhaW5lZCBhbW91bnQgaXRlbWlzZXMgb25lIHNjb3BlZCB0b3RhbC4KCiAgICBgc2NvcGVkYCBpcyBwYXJhbGxlbCB0byBgaGl0c2AgKG9ubHkgbm9uLXplcm8gZW50cmllcyBhcmUgY29uc3VsdGVkKS4KICAgIFRoZSB1bmV4cGxhaW5lZCBub24temVybyBhbW91bnRzIG11c3QgYWxsIGZvbGxvdyBvbmUgc2NvcGVkIG5vbi16ZXJvCiAgICB0b3RhbCwgYmUgdGhlIG9ubHkgbm9uLXplcm8gYW1vdW50cyBhZnRlciBpdCwgbnVtYmVyIGF0IGxlYXN0IHR3bywgYW5kCiAgICBzdW0gdG8gdGhhdCB0b3RhbCBleGFjdGx5LiBaZXJvIGFtb3VudHMgKHRheCBsaW5lcykgbWF5IGludGVybGVhdmUuCiAgICAiIiIKICAgIG5vbnplcm8gPSBbaSBmb3IgaSwgaCBpbiBlbnVtZXJhdGUoaGl0cykgaWYgbm90IF9pc196ZXJvKGhbMl0pXQogICAgdW5leHBsYWluZWQgPSBbaSBmb3IgaSBpbiBub256ZXJvIGlmIG5vdCBzY29wZWRbaV1dCiAgICBpZiBub3QgdW5leHBsYWluZWQ6CiAgICAgICAgcmV0dXJuIEZhbHNlCiAgICBmaXJzdCA9IHVuZXhwbGFpbmVkWzBdCiAgICB0b3RhbF9pZHggPSBOb25lCiAgICBmb3IgaSBpbiByZXZlcnNlZChub256ZXJvKToKICAgICAgICBpZiBpIDwgZmlyc3QgYW5kIHNjb3BlZFtpXToKICAgICAgICAgICAgdG90YWxfaWR4ID0gaQogICAgICAgICAgICBicmVhawogICAgaWYgdG90YWxfaWR4IGlzIE5vbmU6CiAgICAgICAgcmV0dXJuIEZhbHNlCiAgICBhZnRlciA9IFtpIGZvciBpIGluIG5vbnplcm8gaWYgaSA+IHRvdGFsX2lkeF0KICAgIGlmIGFmdGVyICE9IHVuZXhwbGFpbmVkIG9yIGxlbih1bmV4cGxhaW5lZCkgPCAyOgogICAgICAgIHJldHVybiBGYWxzZQogICAgdG90YWwgPSBfdmFsdWUoaGl0c1t0b3RhbF9pZHhdWzJdKQogICAgcGFydHMgPSBbX3ZhbHVlKGhpdHNbaV1bMl0pIGZvciBpIGluIHVuZXhwbGFpbmVkXQogICAgaWYgdG90YWwgaXMgTm9uZSBvciBhbnkocCBpcyBOb25lIGZvciBwIGluIHBhcnRzKToKICAgICAgICByZXR1cm4gRmFsc2UKICAgIHJldHVybiBzdW0ocGFydHMpID09IHRvdGFsICAjIHR5cGU6IGlnbm9yZVthcmctdHlwZV0KCgpkZWYganVkZ2UodGV4dDogc3RyKSAtPiBWZXJkaWN0OgogICAgZmxhdCA9ICIgIi5qb2luKHRleHQuc3BsaXQoKSkKICAgIGlmIG5vdCBmbGF0OgogICAgICAgIHJldHVybiBWZXJkaWN0KEZhbHNlLCBbXSwgIm1vZGFsIGtvc29uZyAvIHRhayB0ZXJiYWNhIikKICAgIGhpdHMgPSBbKG0uc3RhcnQoKSwgbS5lbmQoKSwgbS5ncm91cCgwKSkgZm9yIG0gaW4gTU9ORVkuZmluZGl0ZXIoZmxhdCldCiAgICBhbW91bnRzID0gW2hbMl0gZm9yIGggaW4gaGl0c10KCiAgICB0b2RheSA9IF90b2RheV9hbW91bnRzKGZsYXQsIGhpdHMpCiAgICBpZiB0b2RheToKICAgICAgICBpZiBhbnkobm90IF9pc196ZXJvKGEpIGZvciBhIGluIHRvZGF5KToKICAgICAgICAgICAgcmV0dXJuIFZlcmRpY3QoRmFsc2UsIGFtb3VudHMsICJ0YWdpaGFuIGhhcmkgaW5pIGJ1a2FuIG5vbCIpCiAgICAgICAgcmV0dXJuIFZlcmRpY3QoVHJ1ZSwgYW1vdW50cywgInRvdGFsIGhhcmkgaW5pIG5vbCIpCgogICAgaWYgbm90IGFtb3VudHM6CiAgICAgICAgaWYgRlJFRV9XT1JELnNlYXJjaChmbGF0KToKICAgICAgICAgICAgcmV0dXJuIFZlcmRpY3QoVHJ1ZSwgYW1vdW50cywgInRpZGFrIGFkYSBub21pbmFsLCBhZGEga2F0YSBmcmVlL3RyaWFsIikKICAgICAgICByZXR1cm4gVmVyZGljdChGYWxzZSwgYW1vdW50cywgInRpZGFrIGFkYSBub21pbmFsIHlhbmcgYmlzYSBkaWJhY2EiKQoKICAgIG5vbnplcm8gPSBbaCBmb3IgaCBpbiBoaXRzIGlmIG5vdCBfaXNfemVybyhoWzJdKV0KICAgIGlmIG5vdCBub256ZXJvOgogICAgICAgIHJldHVybiBWZXJkaWN0KFRydWUsIGFtb3VudHMsICJ0ZXJiYWNhIHRvdGFsIG5vbCIpCiAgICAjIFRhbnBhIHRhbWJhdGFuIGhhcmkgaW5pLCBub21pbmFsIGJ1a2FuLW5vbCBoYW55YSBsb2xvcyBzZWJhZ2FpIGhhcmdhCiAgICAjIG1hc2EgZGVwYW4g4oCUIGRhbGFtIGR1YSB0aW5na2F0IGJ1a3RpOgogICAgIyAgIFRpZXIgQTogZGlhbG9nIG1lbXVhdCBidWt0aSBoYXJpIGluaSBncmF0aXMgKGFkYSBub21pbmFsIG5vbCwgYXRhdQogICAgIyAgICAga2F0YSBmcmVlL3RyaWFsKS4gQ3VrdXAgc2V0aWFwIG5vbWluYWwgdGVyaWthdCBrb250ZWtzIG1hc2EgZGVwYW4KICAgICMgICAgIChfRlVUVVJFX0hJTlQsIHRlcm1hc3VrIHNhdHVhbiBiZXJrYWxhICYgInJlbmV3cyIpLgogICAgIyAgIFRpZXIgQjogdGFucGEgbm9sIGRhbiB0YW5wYSBrYXRhIGZyZWUg4oCUIGJlbnR1ayAiVXBjb21pbmcgY2hhcmdlcyIKICAgICMgICAgIGxheWVyIDItNC4gU2V0aWFwIG5vbWluYWwgd2FqaWIgZGlkYWh1bHVpIHBlbmFuZGEgbXVsYWkgZWtzcGxpc2l0CiAgICAjICAgICAoX3N0YXJ0X3Njb3BlZCk7IHNhdHVhbiBiZXJrYWxhIHNhamEgdGlkYWsgY3VrdXAsIGthcmVuYSBkaWFsb2cKICAgICMgICAgIGJlcmJheWFyIHBvbG9zIHB1biBiZXJiZW50dWsgIiQxOS45OS9tb250aCDCtyBCaWxsZWQgbW9udGhseSIuCiAgICBub256ZXJvX2lkeCA9IFtpIGZvciBpLCBoIGluIGVudW1lcmF0ZShoaXRzKSBpZiBub3QgX2lzX3plcm8oaFsyXSldCiAgICBoYXNfZnJlZV9ldmlkZW5jZSA9IGxlbihub256ZXJvX2lkeCkgPCBsZW4oaGl0cykgb3IgYm9vbChGUkVFX1dPUkQuc2VhcmNoKGZsYXQpKQogICAgaWYgaGFzX2ZyZWVfZXZpZGVuY2U6CiAgICAgICAgc2NvcGVkID0gW19mdXR1cmVfc2NvcGVkKGZsYXQsIGgpIGZvciBoIGluIGhpdHNdCiAgICAgICAgaWYgYWxsKHNjb3BlZFtpXSBmb3IgaSBpbiBub256ZXJvX2lkeCk6CiAgICAgICAgICAgIHJldHVybiBWZXJkaWN0KFRydWUsIGFtb3VudHMsICJub21pbmFsIGJ1a2FuIG5vbCBoYW55YSBoYXJnYSBtYXNhIGRlcGFuIikKICAgIGVsc2U6CiAgICAgICAgc2NvcGVkID0gW19zdGFydF9zY29wZWQoZmxhdCwgaCkgZm9yIGggaW4gaGl0c10KICAgICAgICBpZiBhbGwoc2NvcGVkW2ldIGZvciBpIGluIG5vbnplcm9faWR4KToKICAgICAgICAgICAgcmV0dXJuIFZlcmRpY3QoVHJ1ZSwgYW1vdW50cywgInNlbXVhIG5vbWluYWwgdGVyaWthdCBwZW5hbmRhIG11bGFpIG1hc2EgZGVwYW4iKQogICAgIyBSaW5jaWFuIGtvbXBvbmVuOiBub21pbmFsIHlhbmcgYmVsdW0gdGVyamVsYXNrYW4gYm9sZWggamFkaSByaW5jaWFuCiAgICAjIHBlcnNpcyBkYXJpIHNhdHUgdG90YWwgbWFzYSBkZXBhbiAoIiQzMS45OCIgPSAiJDE5Ljk5IiArICIkMTEuOTkiKS4KICAgIGlmIF9jb21wb25lbnRzX2V4cGxhaW4oaGl0cywgc2NvcGVkKToKICAgICAgICByZXR1cm4gVmVyZGljdChUcnVlLCBhbW91bnRzLCAibm9taW5hbCB0YWsgdGVyaWthdCBhZGFsYWggcmluY2lhbiB0b3RhbCBtYXNhIGRlcGFuIikKICAgIHJldHVybiBWZXJkaWN0KEZhbHNlLCBhbW91bnRzLCAiYWRhIG5vbWluYWwgYnVrYW4gbm9sIHRhbnBhIGxhYmVsIGhhcmkgaW5pIikK
+"""Money guard. Fail closed: no readable zero means do not click.
+
+The guard is the only thing standing between a broken token and a real charge,
+so an unreadable total is treated as "not free", never as "probably free".
+
+Judgement is scoped to *today's* charge. A trial dialog legitimately mentions
+money that is not due today ("then $19.99/month, starting <date>"), so a bare
+"any $0.00 anywhere" test is not enough either way: it used to pass a dialog
+that charged $199.99 today next to a $0.00 tax line. Amounts anchored to a
+due-today label decide first. Unanchored non-zero amounts then pass in two
+tiers of evidence: when the dialog itself shows today is free (a zero amount,
+or a free/trial word), it is enough that every price is future-scoped; with
+no such evidence (the "Upcoming charges" shape of layers 2-4) every price
+must be preceded by an explicit start marker ("starting", "then", "after").
+A bare billing period is not a deferral: "$19.99/month · Billed monthly" is
+a paid dialog and fails.
+
+One dialog shape needs a itemisation rule: in the layers 2-4 "Upcoming
+charges" dialog the per-product prices ("Google AI Pro $19.99", "YouTube
+Premium $11.99") are printed *after* the combined future total they belong
+to ("Starting May 8, 2028 $31.98/month"), too far from any start marker to
+pass the scoping tests on their own. Such an amount counts as future-scoped
+only when it is part of an exact itemisation: at least two unexplained
+amounts directly following a scoped total and summing to it to the cent,
+with no other unexplained money after them. Anything else still fails.
+"""
+
+from __future__ import annotations
+
+import re
+
+MONEY = re.compile(r"(?:US\s?\$|USD|\$|Rp\.?|€)\s?[\d.,]+", re.IGNORECASE)
+ZERO = re.compile(r"(?:US\s?\$|USD|\$|Rp\.?|€)\s?0(?:[.,]00)?\b", re.IGNORECASE)
+FREE_WORD = re.compile(r"\b(free|gratis)\b|\b0\s?%|\btrial\b", re.IGNORECASE)
+
+# Label yang menambatkan nominal ke tagihan *hari ini*: "Due today $0.00",
+# "$0.00 due today", "Total today …", "tagihan hari ini …".
+TODAY_LABEL = re.compile(
+    r"(due\s+today|total\s+today|charged\s+today|pay\s+today|amount\s+due|"
+    r"today'?s\s+(?:total|charge)|total\s+due|tagihan\s+hari\s+ini)",
+    re.IGNORECASE,
+)
+# Konteks yang membuat nominal bukan-nol jelas harga masa depan, bukan tagihan
+# hari ini: tarif berkala, tanggal mulai, perpanjangan.
+_FUTURE_HINT = re.compile(
+    r"/\s?(?:month|mo|year|yr)\b|per\s+(?:month|year)|starting|starts\s+on|"
+    r"then\b|after\s+(?:the\s+)?(?:trial|free)|renews|renewal|mulai\s+tanggal",
+    re.IGNORECASE,
+)
+# Penanda mulai masa depan yang *eksplisit*: nominal yang didahului kata ini
+# belum ditagih karena masa harganya belum mulai ("Starting May 8, 2027
+# $13.99"). Lebih ketat dari _FUTURE_HINT: satuan berkala (/month, /year)
+# dan "renews" tidak termasuk — itu siklus tagihan biasa, bukan penundaan.
+_START_HINT = re.compile(
+    r"starting|starts\s+on|then\b|after\b|mulai\s+tanggal",
+    re.IGNORECASE,
+)
+# "You won't be charged today" adalah janji *tidak* menagih; label di
+# belakang negasi seperti ini tidak menambatkan nominal apa pun.
+_NEGATED = re.compile(r"(?:won'?t|will\s+not|never|not)\s+be\s*$|no\s+charge\s*$", re.IGNORECASE)
+# "Today $0.00": kata today telanjang tepat sebelum nominal juga menambatkan
+# nominal itu ke hari ini, walau tanpa label "due/total" di depannya.
+_TODAY_WORD = re.compile(r"\btoday\b", re.IGNORECASE)
+# Tapi today yang didahului penanda rentang bukan label tagihan: pada
+# "starting today …" / "free until today" kata itu menandai kapan harga
+# berkala mulai/berakhir, bukan tagihan hari ini.
+_BARE_SKIP = re.compile(r"(?:starting|until)\s*$", re.IGNORECASE)
+
+
+class Verdict:
+    __slots__ = ("safe", "amounts", "reason")
+
+    def __init__(self, safe: bool, amounts: list[str], reason: str) -> None:
+        self.safe = safe
+        self.amounts = amounts
+        self.reason = reason
+
+    def __repr__(self) -> str:
+        return f"Verdict(safe={self.safe}, amounts={self.amounts}, reason={self.reason!r})"
+
+
+def _is_zero(raw: str) -> bool:
+    """True when every digit of the amount is 0 ("$0.00", "Rp0", "$0,00")."""
+    digits = re.sub(r"\D", "", raw)
+    return bool(digits) and set(digits) == {"0"}
+
+
+def _today_amounts(flat: str, hits: list[tuple[int, int, str]]) -> list[str]:
+    """Amounts anchored to a due-today label: the nearest one on either side.
+
+    Only the nearest amount counts — in flattened dialog text the next line
+    ("then $19.99/month") follows within a few dozen characters and must not
+    be mistaken for today's total.
+    """
+    found: list[str] = []
+    label_spans: list[tuple[int, int]] = []
+    for label in TODAY_LABEL.finditer(flat):
+        label_spans.append((label.start(), label.end()))
+        if _NEGATED.search(flat[max(0, label.start() - 30):label.start()]):
+            continue
+        after = [h for h in hits if label.end() <= h[0] <= label.end() + 48]
+        if after:
+            found.append(after[0][2])
+        before = [h for h in hits if label.start() - 24 <= h[1] <= label.start()]
+        if before:
+            found.append(before[-1][2])
+    # "Today $X": today telanjang menambatkan nominal terdekat sesudahnya.
+    # Lewati today yang sudah jadi bagian label di atas (sudah dihitung)
+    # dan yang didahului penanda rentang ("starting"/"until").
+    for word in _TODAY_WORD.finditer(flat):
+        if any(start <= word.start() < end for start, end in label_spans):
+            continue
+        if _BARE_SKIP.search(flat[max(0, word.start() - 30):word.start()]):
+            continue
+        after = [h for h in hits if word.end() <= h[0] <= word.end() + 24]
+        if after:
+            found.append(after[0][2])
+    return found
+
+
+def _future_scoped(flat: str, hit: tuple[int, int, str]) -> bool:
+    start, end, _raw = hit
+    return bool(_FUTURE_HINT.search(flat[max(0, start - 48):end + 48]))
+
+
+def _start_scoped(flat: str, hit: tuple[int, int, str]) -> bool:
+    """True when an explicit start marker precedes the amount.
+
+    Only the text *before* the amount counts: the marker announces when
+    this price begins, so it stands in front of it ("Starting May 8, 2027
+    $13.99/month"). A marker after the amount describes something else.
+    """
+    start, _end, _raw = hit
+    return bool(_START_HINT.search(flat[max(0, start - 64):start]))
+
+
+def _value(raw: str) -> int | None:
+    """Parse a money string to cents; None when the shape is unrecognised.
+
+    Handles the formats the dialogs actually use: "$31.98", "$1,299.00"
+    (comma = thousands) and "0,00" (comma = decimal). Anything exotic
+    returns None so the itemisation rule simply does not apply.
+    """
+    token = re.search(r"[\d][\d.,]*", raw)
+    if not token:
+        return None
+    num = token.group(0).rstrip(".,")
+    if re.fullmatch(r"\d{1,3}(,\d{3})+(\.\d{1,2})?", num):
+        num = num.replace(",", "")
+    elif re.fullmatch(r"\d+,\d{1,2}", num):
+        num = num.replace(",", ".")
+    elif not re.fullmatch(r"\d+(\.\d{1,2})?", num):
+        return None
+    try:
+        return round(float(num) * 100)
+    except ValueError:
+        return None
+
+
+def _components_explain(
+    hits: list[tuple[int, int, str]], scoped: list[bool]
+) -> bool:
+    """True when every unexplained amount itemises one scoped total.
+
+    `scoped` is parallel to `hits` (only non-zero entries are consulted).
+    The unexplained non-zero amounts must all follow one scoped non-zero
+    total, be the only non-zero amounts after it, number at least two, and
+    sum to that total exactly. Zero amounts (tax lines) may interleave.
+    """
+    nonzero = [i for i, h in enumerate(hits) if not _is_zero(h[2])]
+    unexplained = [i for i in nonzero if not scoped[i]]
+    if not unexplained:
+        return False
+    first = unexplained[0]
+    total_idx = None
+    for i in reversed(nonzero):
+        if i < first and scoped[i]:
+            total_idx = i
+            break
+    if total_idx is None:
+        return False
+    after = [i for i in nonzero if i > total_idx]
+    if after != unexplained or len(unexplained) < 2:
+        return False
+    total = _value(hits[total_idx][2])
+    parts = [_value(hits[i][2]) for i in unexplained]
+    if total is None or any(p is None for p in parts):
+        return False
+    return sum(parts) == total  # type: ignore[arg-type]
+
+
+def judge(text: str) -> Verdict:
+    flat = " ".join(text.split())
+    if not flat:
+        return Verdict(False, [], "modal kosong / tak terbaca")
+    hits = [(m.start(), m.end(), m.group(0)) for m in MONEY.finditer(flat)]
+    amounts = [h[2] for h in hits]
+
+    today = _today_amounts(flat, hits)
+    if today:
+        if any(not _is_zero(a) for a in today):
+            return Verdict(False, amounts, "tagihan hari ini bukan nol")
+        return Verdict(True, amounts, "total hari ini nol")
+
+    if not amounts:
+        if FREE_WORD.search(flat):
+            return Verdict(True, amounts, "tidak ada nominal, ada kata free/trial")
+        return Verdict(False, amounts, "tidak ada nominal yang bisa dibaca")
+
+    nonzero = [h for h in hits if not _is_zero(h[2])]
+    if not nonzero:
+        return Verdict(True, amounts, "terbaca total nol")
+    # Tanpa tambatan hari ini, nominal bukan-nol hanya lolos sebagai harga
+    # masa depan — dalam dua tingkat bukti:
+    #   Tier A: dialog memuat bukti hari ini gratis (ada nominal nol, atau
+    #     kata free/trial). Cukup setiap nominal terikat konteks masa depan
+    #     (_FUTURE_HINT, termasuk satuan berkala & "renews").
+    #   Tier B: tanpa nol dan tanpa kata free — bentuk "Upcoming charges"
+    #     layer 2-4. Setiap nominal wajib didahului penanda mulai eksplisit
+    #     (_start_scoped); satuan berkala saja tidak cukup, karena dialog
+    #     berbayar polos pun berbentuk "$19.99/month · Billed monthly".
+    nonzero_idx = [i for i, h in enumerate(hits) if not _is_zero(h[2])]
+    has_free_evidence = len(nonzero_idx) < len(hits) or bool(FREE_WORD.search(flat))
+    if has_free_evidence:
+        scoped = [_future_scoped(flat, h) for h in hits]
+        if all(scoped[i] for i in nonzero_idx):
+            return Verdict(True, amounts, "nominal bukan nol hanya harga masa depan")
+    else:
+        scoped = [_start_scoped(flat, h) for h in hits]
+        if all(scoped[i] for i in nonzero_idx):
+            return Verdict(True, amounts, "semua nominal terikat penanda mulai masa depan")
+    # Rincian komponen: nominal yang belum terjelaskan boleh jadi rincian
+    # persis dari satu total masa depan ("$31.98" = "$19.99" + "$11.99").
+    if _components_explain(hits, scoped):
+        return Verdict(True, amounts, "nominal tak terikat adalah rincian total masa depan")
+    return Verdict(False, amounts, "ada nominal bukan nol tanpa label hari ini")
