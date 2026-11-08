@@ -257,7 +257,7 @@ langkah login (`signin/rejected`).
 ## Verifikasi
 
 ```bash
-.venv/bin/python tests/selftest.py     # 12 test: TOTP RFC, DB, vault, browser, lock
+.venv/bin/python tests/selftest.py     # 17 test: TOTP RFC, DB, vault, guard, browser, lock
 python3 tools/make_lock.py --verify    # hash lock vs PyPI, tanpa venv
 ./run.sh --check                       # python, data dir, backend secret, browser
 curl -s localhost:8765/healthz         # {"ok":true,"secret_backend":…,"browser":…}

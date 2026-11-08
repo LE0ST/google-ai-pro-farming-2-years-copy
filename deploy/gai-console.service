@@ -10,16 +10,16 @@ WorkingDirectory=%h/google-ai-pro-farming-2-years-copy
 # PORT bebas dipilih; token dan data ikut ke ~/.local/share/GaiConsole.
 Environment=PORT=8765
 Environment=GAI_SECRET_BACKEND=auto
-# Server tanpa layar: biarkan headless. Di desktop, hapus baris berikut.
-Environment=GAI_HEADLESS=auto
-ExecStart=%h/google-ai-pro-farming-2-years-copy/run.sh
+# Browser harus jalan headed (Google menolak login headless), jadi display
+# disediakan Xvfb lewat xvfb-run dan GAI_HEADLESS dimatikan. Bukan headless.
+Environment=GAI_HEADLESS=0
+ExecStart=/usr/bin/xvfb-run -a %h/google-ai-pro-farming-2-years-copy/run.sh
 Restart=on-failure
 RestartSec=5
 
-# Konsol ini menjalankan browser dan menulis profil; jangan pernah naikkan
-# batas ini tanpa alasan.
+# Jangan pakai PrivateTmp di sini: socket X dari xvfb-run dan file kunci
+# profil browser hidup di /tmp dan harus terlihat konsisten antar-proses.
 NoNewPrivileges=yes
-PrivateTmp=yes
 
 [Install]
 WantedBy=default.target

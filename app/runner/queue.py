@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import asyncio
 import os
+import re
 import sys
 import time
 from pathlib import Path
@@ -95,7 +96,9 @@ class Runner:
 
         self.current = acc_id
         self.stopping = False
-        await db.execute("UPDATE accounts SET status = 'running', step = 0 WHERE id = ?", (acc_id,))
+        # step jangan di-nol-kan: nilai tersimpan adalah titik lanjut kalau
+        # proses mati di tengah; run menghitung titik awalnya sendiri.
+        await db.execute("UPDATE accounts SET status = 'running' WHERE id = ?", (acc_id,))
 
         # A hard-killed Chrome leaves a lock beside the profile and the next launch
         # dies with "Opening in existing browser session".
@@ -106,6 +109,7 @@ class Runner:
                 pass
 
         log_path = settings.artifacts_dir / f"run_{acc_id}_{int(time.time())}.log"
+        timed_out = False
         with open(log_path, "wb") as fh:
             # Paksa UTF-8 di subprocess: di Windows stdout ke file memakai
             # codepage lokal (cp1252) dan log alur penuh karakter non-ASCII.
@@ -114,11 +118,29 @@ class Runner:
                 cwd=str(BASE), stdout=fh, stderr=asyncio.subprocess.STDOUT,
                 env={**os.environ, "PYTHONUTF8": "1", "PYTHONIOENCODING": "utf-8"},
             )
-            await self.proc.wait()
+            try:
+                await asyncio.wait_for(self.proc.wait(), timeout=settings.run_timeout)
+            except asyncio.TimeoutError:
+                # Run menggantung tidak boleh menyandera antrean selamanya:
+                # bunuh pohon prosesnya (Chrome ikut di bawah runner) dan
+                # tandai gagal — bukan cancelled, itu untuk stop dari user.
+                timed_out = True
+                if sys.platform == "win32":
+                    await asyncio.to_thread(_kill_tree, self.proc.pid)
+                else:
+                    self.proc.kill()
+                await self.proc.wait()
+
+        if timed_out:
+            with open(log_path, "a", encoding="utf-8") as fh:
+                fh.write(f"\n[queue] run melewati batas {settings.run_timeout}s"
+                         " — proses dihentikan, akun ditandai failed\n")
 
         code = self.proc.returncode if self.proc else -1
         self.proc = None
-        if code == 0:
+        if timed_out:
+            status = "failed"
+        elif code == 0:
             status = "subscribed"
         elif self.stopping:
             status = "cancelled"
@@ -148,8 +170,14 @@ def _kill_tree(pid: int) -> None:
 
 runner = Runner()
 
+_ACC_ID = re.compile(r"^acc_[0-9a-f]{12}$")
+
 
 def latest_log(acc_id: str) -> Path | None:
+    # acc_id mentah dari URL tidak boleh jadi pola glob: ".." atau "*" di
+    # dalamnya bisa menunjuk file di luar direktori log akun ini.
+    if not _ACC_ID.match(acc_id):
+        return None
     files = sorted(settings.artifacts_dir.glob(f"run_{acc_id}_*.log"))
     return files[-1] if files else None
 

@@ -11,10 +11,10 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from playwright.async_api import async_playwright  # noqa: E402
 
+from app import db, vault  # noqa: E402
 from app.config import settings  # noqa: E402
 from app.runner import browser  # noqa: E402
 
-ACC = "acc_pyro.solana.labs"
 PLAY = "https://play.google.com/store/account/subscriptions?hl=en"
 
 DUMP = """() => ({
@@ -28,9 +28,24 @@ DUMP = """() => ({
 })"""
 
 
+async def _acc_id_for(email: str) -> str:
+    """Selesaikan acc_id dari email lewat vault (id akun acak, bukan turunan email)."""
+    settings.ensure_dirs()
+    await db.migrate()
+    creds = await vault.account_creds(email)
+    if not creds:
+        print(f"akun tidak ada di database: {email}", flush=True)
+        raise SystemExit(2)
+    return creds[0]
+
+
 async def main() -> int:
+    if len(sys.argv) < 2:
+        print("usage: .venv/bin/python tasks/cancel_probe.py <email>")
+        return 2
+    acc_id = await _acc_id_for(sys.argv[1])
     async with async_playwright() as p:
-        ctx = await browser.launch(p, settings.profiles_dir / f"profile_{ACC}", headless=False)
+        ctx = await browser.launch(p, settings.profiles_dir / f"profile_{acc_id}", headless=False)
         page = ctx.pages[0] if ctx.pages else await ctx.new_page()
         await page.goto(PLAY, wait_until="domcontentloaded")
         await asyncio.sleep(4)

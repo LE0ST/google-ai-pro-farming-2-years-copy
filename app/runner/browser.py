@@ -173,6 +173,7 @@ _mirror_cache: dict[str, tuple[int, str, bytes]] = {}
 
 
 def _fetch_clients2_mirror(url: str) -> tuple[int, str, bytes]:
+    import ssl
     import urllib.parse
     import urllib.request
 
@@ -186,11 +187,46 @@ def _fetch_clients2_mirror(url: str) -> tuple[int, str, bytes]:
     if u.query:
         mirror += "&" + u.query
     req = urllib.request.Request(mirror, headers={"User-Agent": "Mozilla/5.0"})
+
+    # Fetch ini tunduk pada opt-in egress yang sama dengan Chromium (lihat
+    # _base_args dan launch): proxy relay lokal + sertifikat hasil tanda
+    # tangan ulang proxy. Tanpa keduanya, mirror mati di jaringan yang justru
+    # paling membutuhkannya.
+    handlers: list[Any] = []
+    raw_proxy = os.environ.get("GAI_BROWSER_PROXY", "").strip()
+    if raw_proxy:
+        from .. import egress
+
+        parsed = egress.parse(raw_proxy)
+        if parsed:
+            server = parsed["server"]
+            if parsed.get("username"):
+                auth = "{}:{}@".format(
+                    urllib.parse.quote(parsed["username"], safe=""),
+                    urllib.parse.quote(parsed.get("password", ""), safe=""),
+                )
+                scheme, _, rest = server.partition("://")
+                server = f"{scheme}://{auth}{rest}"
+            handlers.append(urllib.request.ProxyHandler({"http": server, "https": server}))
+    if os.environ.get("GAI_IGNORE_CERT_ERRORS") == "1":
+        ctx = ssl.create_default_context()
+        ctx.check_hostname = False
+        ctx.verify_mode = ssl.CERT_NONE
+        handlers.append(urllib.request.HTTPSHandler(context=ctx))
+    opener = urllib.request.build_opener(*handlers)
+
     try:
-        with urllib.request.urlopen(req, timeout=30) as resp:
+        with opener.open(req, timeout=30) as resp:
             out = (resp.status, resp.headers.get_content_type(), resp.read())
-    except Exception:  # noqa: BLE001 - fall back to an empty script
-        out = (502, "application/javascript", b"")
+    except Exception as exc:  # noqa: BLE001 - fall back to an empty script
+        # Kegagalan tidak di-cache: satu fetch yang gagal sesaat tidak boleh
+        # meracuni URL itu selama sisa umur proses.
+        log.warning("clients2 mirror gagal %s: %s", url[:90], exc)
+        return (502, "application/javascript", b"")
+    if out[0] != 200 or not out[2]:
+        log.warning("clients2 mirror %s -> %s (%d byte), tidak di-cache",
+                    url[:90], out[0], len(out[2]))
+        return out
     _mirror_cache[url] = out
     return out
 

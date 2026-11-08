@@ -43,6 +43,8 @@ class Settings(BaseSettings):
 
     # Google login flows: parallel logins from one egress burn reputation faster
     # than a sequential queue. Keep this at 1 unless measured otherwise.
+    # The queue is intentionally sequential (a single worker); this setting is
+    # reserved for a future worker pool and does not change that today.
     max_concurrent: int = 1
 
     # Seconds a single account run may take before the supervisor cancels it.

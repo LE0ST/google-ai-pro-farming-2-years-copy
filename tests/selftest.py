@@ -217,6 +217,72 @@ def test_browser_resolution_shape() -> None:
     assert "headless" in browser.describe() or "headed" in browser.describe()
 
 
+def test_guard_judge_today_scoping() -> None:
+    """Money guard dinilai dari tagihan *hari ini*, bukan nol di mana saja."""
+    from app.sites.google_one import guard
+
+    # (a) trial sah: hari ini $0.00, harga masa depan disebut -> lolos
+    v = guard.judge("Start free trial · Due today $0.00 · Then $19.99/month starting Dec 8, 2026")
+    assert v.safe, v
+    # (b) tagihan hari ini bukan nol, walau ada $0.00 (pajak) -> gagal
+    v = guard.judge("Subscribe · $199.99 due today + $0.00 tax")
+    assert not v.safe, v
+    # (c) teks kosong / tak terbaca -> gagal (fail closed)
+    assert not guard.judge("").safe
+    assert not guard.judge("   ").safe
+    assert not guard.judge("dialog tanpa nominal apa pun").safe
+    # (d) tagihan hari ini bukan nol tanpa nol sama sekali -> gagal
+    assert not guard.judge("Due today $49.99").safe
+    # nominal bukan nol tanpa label hari ini & tanpa konteks masa depan -> gagal
+    assert not guard.judge("Total $199.99 · tax $0.00").safe
+    # hanya harga masa depan + nol -> lolos
+    assert guard.judge("Due $0.00 · renews at $19.99/month after the trial").safe
+    # negasi bukan tagihan: "won't be charged today" tidak menambatkan nominal
+    v = guard.judge("You won't be charged today · $0.00 due at trial end · then $19.99/month")
+    assert v.safe, v
+
+
+def test_vault_card_rotation_and_reimport() -> None:
+    """kill_card memutar akun ke kartu aktif; re-impor menyegarkan akun."""
+    from app import vault
+
+    async def run() -> None:
+        await db.migrate()
+        ok, note = await vault.add_card("4242424242424242", "12", "30", "123")
+        assert ok, note
+        ok, note = await vault.add_card("5555555555554444", "12", "30", "123")
+        assert ok, note
+        ok, note = await vault.add_account("uji@example.com", "pw-lama", "")
+        assert ok, note
+        acc = await db.fetch_one("SELECT * FROM accounts WHERE email = 'uji@example.com'")
+        assert acc is not None and acc["card_id"], acc
+        dead = acc["card_id"]
+        others = [c["id"] for c in await db.fetch_all("SELECT id FROM cards") if c["id"] != dead]
+        assert len(others) == 1
+
+        await vault.kill_card(dead, dead=True)
+        acc = await db.fetch_one("SELECT * FROM accounts WHERE email = 'uji@example.com'")
+        assert acc["card_id"] == others[0], acc["card_id"]
+
+        # hidupkan lagi: backfill tidak mencuri akun yang sudah punya kartu
+        await vault.kill_card(dead, dead=False)
+        acc = await db.fetch_one("SELECT * FROM accounts WHERE email = 'uji@example.com'")
+        assert acc["card_id"] == others[0], acc["card_id"]
+
+        # re-impor: seed yang dulu kosong kini tertulis, failed -> pending,
+        # penugasan kartu tetap valid
+        await db.execute("UPDATE accounts SET status = 'failed' WHERE id = ?", (acc["id"],))
+        ok, note = await vault.add_account("uji@example.com", "pw-baru", "JBSWY3DPEHPK3PXP")
+        assert not ok and note.endswith("diperbarui"), note
+        acc = await db.fetch_one("SELECT * FROM accounts WHERE email = 'uji@example.com'")
+        assert acc["status"] == "pending", acc["status"]
+        assert acc["totp_ref"] == f"{acc['id']}:totp", acc["totp_ref"]
+        assert acc["card_id"] == others[0], acc["card_id"]
+        assert vault.secret_get(acc["totp_ref"])
+
+    asyncio.run(run())
+
+
 def test_lock_covers_platforms() -> None:
     """A darwin-only lock is what broke Linux installs; keep all platforms in it."""
     lock = Path(__file__).resolve().parent.parent / "requirements.lock"

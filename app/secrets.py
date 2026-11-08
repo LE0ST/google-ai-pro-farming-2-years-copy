@@ -154,24 +154,32 @@ def _store_save(data: dict[str, str]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     # Nama tmp unik per proses: dua penulis tidak saling menimpa file temp.
     tmp = path.with_name(f"{path.name}.{os.getpid()}.tmp")
-    fd = os.open(tmp, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
-    with os.fdopen(fd, "w", encoding="utf-8") as fh:
-        json.dump(data, fh, ensure_ascii=False, sort_keys=True)
-        fh.flush()
-        os.fsync(fh.fileno())
-    if sys.platform == "win32":
-        # Di NTFS, pembaca yang sedang membuka vault bisa membuat os.replace
-        # gagal sesaat dengan PermissionError — coba lagi beberapa kali.
-        for attempt in range(10):
-            try:
-                os.replace(tmp, path)
-                break
-            except PermissionError:
-                if attempt == 9:
-                    raise
-                time.sleep(0.05)
-    else:
-        os.replace(tmp, path)
+    try:
+        fd = os.open(tmp, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+        with os.fdopen(fd, "w", encoding="utf-8") as fh:
+            json.dump(data, fh, ensure_ascii=False, sort_keys=True)
+            fh.flush()
+            os.fsync(fh.fileno())
+        if sys.platform == "win32":
+            # Di NTFS, pembaca yang sedang membuka vault bisa membuat os.replace
+            # gagal sesaat dengan PermissionError — coba lagi beberapa kali.
+            for attempt in range(10):
+                try:
+                    os.replace(tmp, path)
+                    break
+                except PermissionError:
+                    if attempt == 9:
+                        raise
+                    time.sleep(0.05)
+        else:
+            os.replace(tmp, path)
+    except BaseException:
+        # Jangan tinggalkan tmp yatim saat tulis/replace gagal di tengah.
+        try:
+            tmp.unlink(missing_ok=True)
+        except OSError:
+            pass
+        raise
     try:
         path.chmod(0o600)
     except OSError:

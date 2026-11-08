@@ -42,7 +42,7 @@
       const parts = bodyStr.split('&');
       for (let i = 0; i < parts.length; i++) {
         if (parts[i].startsWith('f.req=')) {
-          const raw = decodeURIComponent(parts[i].slice(6).replace(/\\+/g, ' '));
+          const raw = decodeURIComponent(parts[i].slice(6).replace(/\+/g, ' '));
           const outer = JSON.parse(raw);
           let changed = false;
           if (Array.isArray(outer)) {

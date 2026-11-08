@@ -17,6 +17,9 @@ $env:PYTHONIOENCODING = "utf-8"
 
 Push-Location $PSScriptRoot
 try {
+    # Disimpan untuk dipulihkan di finally: GAI_BIND_PORT sesi pemanggil
+    # tidak boleh berubah permanen gara-gara menjalankan skrip ini.
+    $PrevBindPort = $env:GAI_BIND_PORT
     function Say($msg) { Write-Host $msg }
     function Die($msg) { Write-Host "gagal: $msg"; exit 1 }
 
@@ -52,7 +55,7 @@ try {
 
     $depsOk = $false
     try {
-        & $VenvPy -c "import fastapi, playwright" 2>$null
+        & $VenvPy -c "import fastapi, playwright, tzdata" 2>$null
         $depsOk = ($LASTEXITCODE -eq 0)
     } catch { $depsOk = $false }
     if (-not $depsOk) {
@@ -103,9 +106,18 @@ try {
 
     Say "catatan: tidak ada keyring CLI di Windows -- secret disimpan di vault.json di data dir (ACL profil user)"
 
+    # Banner boot app membaca port dari env GAI_BIND_PORT; proses anak harus
+    # melihat nilai yang sama dengan --port di bawah, tanpa mengotori sesi
+    # pemanggil (dipulihkan di finally).
+    $env:GAI_BIND_PORT = $BindPort
     & $VenvPy -m uvicorn app.main:app --host $BindHost --port $BindPort --log-level warning
     exit $LASTEXITCODE
 }
 finally {
+    if ($null -eq $PrevBindPort) {
+        Remove-Item Env:GAI_BIND_PORT -ErrorAction SilentlyContinue
+    } else {
+        $env:GAI_BIND_PORT = $PrevBindPort
+    }
     Pop-Location
 }

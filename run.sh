@@ -32,7 +32,7 @@ if [ ! -x .venv/bin/python ]; then
   "$PY" -m venv .venv || die "venv gagal — paket python3-venv belum terpasang? (sudo apt install python3.12-venv)"
 fi
 
-if ! .venv/bin/python -c 'import fastapi, playwright' >/dev/null 2>&1; then
+if ! .venv/bin/python -c 'import fastapi, playwright, tzdata' >/dev/null 2>&1; then
   say "memasang dependensi hash-pinned dari requirements.lock"
   .venv/bin/python -m pip install --quiet --upgrade pip
   .venv/bin/python -m pip install --require-hashes --no-input -r requirements.lock
