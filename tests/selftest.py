@@ -253,6 +253,14 @@ def test_guard_judge_today_scoping() -> None:
         " · Starting May 8, 2028 $19.99/month · Subscribe"
     )
     assert v.safe, v
+    # dialog berbayar polos (Tier B tanpa penanda mulai): satuan berkala
+    # /month & /year serta "renews" bukan penundaan -> gagal
+    assert not guard.judge(
+        "Google AI Pro (2 TB) · $19.99/month · Billed monthly · Subscribe"
+    ).safe
+    assert not guard.judge(
+        "Subscribe to Google AI Pro · $199.99/year · Auto-renews on Nov 8, 2027"
+    ).safe
     # "Today $X": today telanjang menambatkan nominal sesudahnya
     assert not guard.judge("Today $19.99").safe
     v = guard.judge("12-month free trial · Today $0.00 · $19.99/month after trial")

@@ -7,8 +7,13 @@ Judgement is scoped to *today's* charge. A trial dialog legitimately mentions
 money that is not due today ("then $19.99/month, starting <date>"), so a bare
 "any $0.00 anywhere" test is not enough either way: it used to pass a dialog
 that charged $199.99 today next to a $0.00 tax line. Amounts anchored to a
-due-today label decide first; unanchored non-zero amounts only pass when they
-are visibly future prices (per month/year, starting later, a renewal).
+due-today label decide first. Unanchored non-zero amounts then pass in two
+tiers of evidence: when the dialog itself shows today is free (a zero amount,
+or a free/trial word), it is enough that every price is future-scoped; with
+no such evidence (the "Upcoming charges" shape of layers 2-4) every price
+must be preceded by an explicit start marker ("starting", "then", "after").
+A bare billing period is not a deferral: "$19.99/month · Billed monthly" is
+a paid dialog and fails.
 """
 
 from __future__ import annotations
@@ -31,6 +36,14 @@ TODAY_LABEL = re.compile(
 _FUTURE_HINT = re.compile(
     r"/\s?(?:month|mo|year|yr)\b|per\s+(?:month|year)|starting|starts\s+on|"
     r"then\b|after\s+(?:the\s+)?(?:trial|free)|renews|renewal|mulai\s+tanggal",
+    re.IGNORECASE,
+)
+# Penanda mulai masa depan yang *eksplisit*: nominal yang didahului kata ini
+# belum ditagih karena masa harganya belum mulai ("Starting May 8, 2027
+# $13.99"). Lebih ketat dari _FUTURE_HINT: satuan berkala (/month, /year)
+# dan "renews" tidak termasuk — itu siklus tagihan biasa, bukan penundaan.
+_START_HINT = re.compile(
+    r"starting|starts\s+on|then\b|after\b|mulai\s+tanggal",
     re.IGNORECASE,
 )
 # "You won't be charged today" adalah janji *tidak* menagih; label di
@@ -101,6 +114,17 @@ def _future_scoped(flat: str, hit: tuple[int, int, str]) -> bool:
     return bool(_FUTURE_HINT.search(flat[max(0, start - 48):end + 48]))
 
 
+def _start_scoped(flat: str, hit: tuple[int, int, str]) -> bool:
+    """True when an explicit start marker precedes the amount.
+
+    Only the text *before* the amount counts: the marker announces when
+    this price begins, so it stands in front of it ("Starting May 8, 2027
+    $13.99/month"). A marker after the amount describes something else.
+    """
+    start, _end, _raw = hit
+    return bool(_START_HINT.search(flat[max(0, start - 64):start]))
+
+
 def judge(text: str) -> Verdict:
     flat = " ".join(text.split())
     if not flat:
@@ -122,10 +146,18 @@ def judge(text: str) -> Verdict:
     nonzero = [h for h in hits if not _is_zero(h[2])]
     if not nonzero:
         return Verdict(True, amounts, "terbaca total nol")
-    # Tanpa tambatan hari ini, satu-satunya nominal bukan-nol yang boleh
-    # lolos adalah yang *semuanya* jelas harga masa depan: kalau setiap
-    # harga di dialog terikat tanggal/tarif mendatang, tidak ada yang
-    # ditagih hari ini (bentuk dialog "Upcoming charges" layer 2-4).
-    if all(_future_scoped(flat, h) for h in nonzero):
+    # Tanpa tambatan hari ini, nominal bukan-nol hanya lolos sebagai harga
+    # masa depan — dalam dua tingkat bukti:
+    #   Tier A: dialog memuat bukti hari ini gratis (ada nominal nol, atau
+    #     kata free/trial). Cukup setiap nominal terikat konteks masa depan
+    #     (_FUTURE_HINT, termasuk satuan berkala & "renews").
+    #   Tier B: tanpa nol dan tanpa kata free — bentuk "Upcoming charges"
+    #     layer 2-4. Setiap nominal wajib didahului penanda mulai eksplisit
+    #     (_start_scoped); satuan berkala saja tidak cukup, karena dialog
+    #     berbayar polos pun berbentuk "$19.99/month · Billed monthly".
+    has_free_evidence = len(nonzero) < len(hits) or bool(FREE_WORD.search(flat))
+    if has_free_evidence and all(_future_scoped(flat, h) for h in nonzero):
         return Verdict(True, amounts, "nominal bukan nol hanya harga masa depan")
+    if not has_free_evidence and all(_start_scoped(flat, h) for h in nonzero):
+        return Verdict(True, amounts, "semua nominal terikat penanda mulai masa depan")
     return Verdict(False, amounts, "ada nominal bukan nol tanpa label hari ini")
