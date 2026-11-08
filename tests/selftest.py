@@ -1,1 +1,404 @@
-IiIiU2VsZi10ZXN0LCBzdGRsaWIgb25seS4gUnVuOiAudmVudi9iaW4vcHl0aG9uIHRlc3RzL3NlbGZ0ZXN0LnB5IiIiCgpmcm9tIF9fZnV0dXJlX18gaW1wb3J0IGFubm90YXRpb25zCgppbXBvcnQgYXN5bmNpbwppbXBvcnQgb3MKaW1wb3J0IHJlCmltcG9ydCBzeXMKaW1wb3J0IHRlbXBmaWxlCmZyb20gcGF0aGxpYiBpbXBvcnQgUGF0aAoKc3lzLnBhdGguaW5zZXJ0KDAsIHN0cihQYXRoKF9fZmlsZV9fKS5yZXNvbHZlKCkucGFyZW50LnBhcmVudCkpCgojIEphbmdhbiBzZW50dWggZGF0YSBhc2xpOiB1amkgamFsYW4gZGkgZGlyZWt0b3JpIHNlbWVudGFyYS4KX1RNUCA9IFBhdGgodGVtcGZpbGUubWtkdGVtcChwcmVmaXg9ImdhaS1zZWxmdGVzdC0iKSkKb3MuZW52aXJvblsiR0FJX0RBVEFfRElSIl0gPSBzdHIoX1RNUCkKCmZyb20gYXBwIGltcG9ydCBkYiwgc2VjcmV0cywgdG90cCAgIyBub3FhOiBFNDAyCmZyb20gYXBwLmNvbmZpZyBpbXBvcnQgX2RlZmF1bHRfZGF0YV9kaXIsIHNldHRpbmdzICAjIG5vcWE6IEU0MDIKZnJvbSBhcHAubW9kZWxzIGltcG9ydCBBY2NvdW50Q3JlYXRlICAjIG5vcWE6IEU0MDIKZnJvbSBhcHAucnVubmVyIGltcG9ydCBicm93c2VyICAjIG5vcWE6IEU0MDIKCiMgUkZDIDYyMzggQXBwZW5kaXggQjogc2VjcmV0ICIxMjM0NTY3ODkwMTIzNDU2Nzg5MCIgKEFTQ0lJKSwgU0hBLTEsIDggZGlnaXRzLgpSRkNfU0VDUkVUID0gIkdFWkRHTkJWR1kzVFFPSlFHRVpER05CVkdZM1RRT0pRIgoKCmRlZiB0ZXN0X3RvdHBfcmZjX3ZlY3RvcnMoKSAtPiBOb25lOgogICAgY2FzZXMgPSB7NTk6ICIyODcwODIiLCAxMTExMTExMTA5OiAiMDgxODA0IiwgMTIzNDU2Nzg5MDogIjAwNTkyNCIsIDIwMDAwMDAwMDA6ICIyNzkwMzcifQogICAgZm9yIGF0LCBleHBlY3RlZCBpbiBjYXNlcy5pdGVtcygpOgogICAgICAgIGFzc2VydCB0b3RwLmNvZGUoUkZDX1NFQ1JFVCwgYXQ9YXQpID09IGV4cGVjdGVkLCAoYXQsIHRvdHAuY29kZShSRkNfU0VDUkVULCBhdD1hdCkpCgoKZGVmIHRlc3RfdG90cF9zaGFwZXMoKSAtPiBOb25lOgogICAgYXNzZXJ0IHRvdHAuY29kZSgiIikgPT0gIiIKICAgIGFzc2VydCB0b3RwLmNvZGUoIm5vdC1iYXNlMzIhISIpID09ICIiCiAgICBhc3NlcnQgdG90cC5jb2RlKCJqYnN3IHkzZHAgZWhwayAzcHhwIikgIT0gIiIKICAgIGFzc2VydCAxIDw9IHRvdHAuc2Vjb25kc19sZWZ0KCkgPD0gMzAKICAgIGFzc2VydCB0b3RwLndhaXRfaGludChhdD0wKSA9PSAwCgoKZGVmIHRlc3RfZW1haWxfbm9ybWFsaXNhdGlvbigpIC0+IE5vbmU6CiAgICBhID0gQWNjb3VudENyZWF0ZShlbWFpbD0iU29tZS5PbmVAR21haWwuQ09NIiwgcGFzc3dvcmQ9IngiKQogICAgYXNzZXJ0IGEuZW1haWwgPT0gInNvbWUub25lQGdtYWlsLmNvbSIKICAgIGZvciBiYWQgaW4gKCJub3BlIiwgImFAYiIsICJAYi5jb20iLCAiYSBiQGMuY29tIik6CiAgICAgICAgdHJ5OgogICAgICAgICAgICBBY2NvdW50Q3JlYXRlKGVtYWlsPWJhZCwgcGFzc3dvcmQ9IngiKQogICAgICAgIGV4Y2VwdCBFeGNlcHRpb246CiAgICAgICAgICAgIGNvbnRpbnVlCiAgICAgICAgcmFpc2UgQXNzZXJ0aW9uRXJyb3IoZiJhY2NlcHRlZCBiYWQgZW1haWwge2JhZCFyfSIpCgoKZGVmIHRlc3Rfc2VjcmV0c19yb3VuZHRyaXAoKSAtPiBOb25lOgogICAgcmVmID0gInNlbGZ0ZXN0OnJvdW5kdHJpcCIKICAgIHNlY3JldHMuZGVsZXRlKHJlZikKICAgIGFzc2VydCBzZWNyZXRzLmdldChyZWYpID09ICIiCiAgICBzZWNyZXRzLnB1dChyZWYsICJwQHNzLXdpdGgtc3ltYm9scy05PVgiKQogICAgYXNzZXJ0IHNlY3JldHMuZ2V0KHJlZikgPT0gInBAc3Mtd2l0aC1zeW1ib2xzLTk9WCIKICAgIHNlY3JldHMucHV0KHJlZiwgIm92ZXJ3cml0dGVuIikKICAgIGFzc2VydCBzZWNyZXRzLmdldChyZWYpID09ICJvdmVyd3JpdHRlbiIKICAgIHNlY3JldHMuZGVsZXRlKHJlZikKICAgIGFzc2VydCBzZWNyZXRzLmdldChyZWYpID09ICIiCgoKZGVmIHRlc3RfZGJfbWlncmF0ZSgpIC0+IE5vbmU6CiAgICBhc3luYyBkZWYgcnVuKCkgLT4gTm9uZToKICAgICAgICBhd2FpdCBkYi5taWdyYXRlKCkKICAgICAgICBhd2FpdCBkYi5taWdyYXRlKCkgICMgaWRlbXBvdGVudAogICAgICAgIHJvdyA9IGF3YWl0IGRiLmZldGNoX29uZSgiU0VMRUNUIENPVU5UKCopIEFTIG4gRlJPTSBhY2NvdW50cyIpCiAgICAgICAgYXNzZXJ0IHJvdyBpcyBub3QgTm9uZSBhbmQgcm93WyJuIl0gPT0gMAogICAgICAgIGNvbHMgPSB7clsibmFtZSJdIGZvciByIGluIGF3YWl0IGRiLmZldGNoX2FsbCgiUFJBR01BIHRhYmxlX2luZm8oYWNjb3VudHMpIil9CiAgICAgICAgYXNzZXJ0IHsiZW1haWwiLCAic2VjcmV0X3JlZiIsICJ0b3RwX3JlZiIsICJzdGVwIiwgImV4cGlyeV9kYXRlIn0gPD0gY29scwoKICAgIGFzeW5jaW8ucnVuKHJ1bigpKQoKCmRlZiB0ZXN0X3NlY3JldF9iYWNrZW5kX3JlcG9ydGVkKCkgLT4gTm9uZToKICAgIGFzc2VydCBzZWNyZXRzLmJhY2tlbmQoKSBpbiB7InNlY3VyaXR5IiwgInNlY3JldC10b29sIiwgImZpbGUifQogICAgYXNzZXJ0IHNlY3JldHMuZGVzY3JpYmUoKQoKCmRlZiB0ZXN0X2ZpbGVfYmFja2VuZF9yb3VuZHRyaXBfYW5kX21vZGUoKSAtPiBOb25lOgogICAgIiIiVGhlIGZhbGxiYWNrIGJhY2tlbmQgbXVzdCB3b3JrIGFuZCBtdXN0IG5ldmVyIGJlIGdyb3VwL3dvcmxkIHJlYWRhYmxlLiIiIgogICAgc2F2ZWQgPSBzZWNyZXRzLl9iYWNrZW5kCiAgICB0cnk6CiAgICAgICAgc2VjcmV0cy5fYmFja2VuZCA9ICJmaWxlIgogICAgICAgIHJlZiA9ICJzZWxmdGVzdDpmaWxlIgogICAgICAgIHNlY3JldHMucHV0KHJlZiwgIm5pbGFpLXJhaGFzaWEiKQogICAgICAgIGFzc2VydCBzZWNyZXRzLmdldChyZWYpID09ICJuaWxhaS1yYWhhc2lhIgogICAgICAgIGFzc2VydCBzZWNyZXRzLmV4aXN0cyhyZWYpCiAgICAgICAgcGF0aCA9IHNldHRpbmdzLmRhdGFfZGlyIC8gInZhdWx0Lmpzb24iCiAgICAgICAgYXNzZXJ0IHBhdGguZXhpc3RzKCksIHBhdGgKICAgICAgICBpZiBzeXMucGxhdGZvcm0gIT0gIndpbjMyIjoKICAgICAgICAgICAgIyBXaW5kb3dzIGhhcyBubyBQT1NJWCBtb2RlczsgdGhlIHByb2ZpbGUgQUNMIGlzIHRoZSBwcm90ZWN0aW9uLgogICAgICAgICAgICBhc3NlcnQgcGF0aC5zdGF0KCkuc3RfbW9kZSAmIDBvMDc3ID09IDAsIG9jdChwYXRoLnN0YXQoKS5zdF9tb2RlKQogICAgICAgIHNlY3JldHMuZGVsZXRlKHJlZikKICAgICAgICBhc3NlcnQgc2VjcmV0cy5nZXQocmVmKSA9PSAiIgogICAgZmluYWxseToKICAgICAgICBzZWNyZXRzLl9iYWNrZW5kID0gc2F2ZWQKCgpkZWYgdGVzdF9kYXRhX2Rpcl9mb2xsb3dzX3BsYXRmb3JtKCkgLT4gTm9uZToKICAgIHBhdGggPSBfZGVmYXVsdF9kYXRhX2RpcigpCiAgICBhc3NlcnQgcGF0aC5uYW1lID09ICJHYWlDb25zb2xlIgogICAgaWYgc3lzLnBsYXRmb3JtID09ICJkYXJ3aW4iOgogICAgICAgIGFzc2VydCAiTGlicmFyeS9BcHBsaWNhdGlvbiBTdXBwb3J0IiBpbiBwYXRoLmFzX3Bvc2l4KCkKICAgIGVsaWYgc3lzLnBsYXRmb3JtID09ICJ3aW4zMiI6CiAgICAgICAgaWYgbm90IG9zLmVudmlyb24uZ2V0KCJMT0NBTEFQUERBVEEiKToKICAgICAgICAgICAgYXNzZXJ0ICJBcHBEYXRhL0xvY2FsIiBpbiBwYXRoLmFzX3Bvc2l4KCksIHBhdGgKICAgIGVsaWYgbm90IG9zLmVudmlyb24uZ2V0KCJYREdfREFUQV9IT01FIik6CiAgICAgICAgYXNzZXJ0IHBhdGguYXNfcG9zaXgoKS5lbmRzd2l0aCgiLmxvY2FsL3NoYXJlL0dhaUNvbnNvbGUiKSwgcGF0aAoKCmRlZiB0ZXN0X2hlYWRsZXNzX3Jlc29sdXRpb24oKSAtPiBOb25lOgogICAgc2F2ZWRfbW9kZSwgc2F2ZWRfZGlzcGxheSA9IHNldHRpbmdzLmhlYWRsZXNzLCBvcy5lbnZpcm9uLmdldCgiRElTUExBWSIpCiAgICB0cnk6CiAgICAgICAgc2V0dGluZ3MuaGVhZGxlc3MgPSAiMSIKICAgICAgICBhc3NlcnQgYnJvd3Nlci5yZXNvbHZlX2hlYWRsZXNzKEZhbHNlKSBpcyBUcnVlCiAgICAgICAgc2V0dGluZ3MuaGVhZGxlc3MgPSAiMCIKICAgICAgICBhc3NlcnQgYnJvd3Nlci5yZXNvbHZlX2hlYWRsZXNzKE5vbmUpIGlzIEZhbHNlCiAgICAgICAgc2V0dGluZ3MuaGVhZGxlc3MgPSAiYXV0byIKICAgICAgICBpZiBzeXMucGxhdGZvcm0uc3RhcnRzd2l0aCgibGludXgiKToKICAgICAgICAgICAgb3MuZW52aXJvbi5wb3AoIkRJU1BMQVkiLCBOb25lKQogICAgICAgICAgICBvcy5lbnZpcm9uLnBvcCgiV0FZTEFORF9ESVNQTEFZIiwgTm9uZSkKICAgICAgICAgICAgIyBoZWFkZWQgd2FzIGFza2VkIGZvciwgbm8gZGlzcGxheSBleGlzdHM6IGhlYWRsZXNzIGlzIHRoZSBvbmx5IG9wdGlvbgogICAgICAgICAgICBhc3NlcnQgYnJvd3Nlci5yZXNvbHZlX2hlYWRsZXNzKEZhbHNlKSBpcyBUcnVlCiAgICBmaW5hbGx5OgogICAgICAgIHNldHRpbmdzLmhlYWRsZXNzID0gc2F2ZWRfbW9kZQogICAgICAgIGlmIHNhdmVkX2Rpc3BsYXkgaXMgbm90IE5vbmU6CiAgICAgICAgICAgIG9zLmVudmlyb25bIkRJU1BMQVkiXSA9IHNhdmVkX2Rpc3BsYXkKCgpkZWYgdGVzdF9kaXNjb3Zlcl90b2RheV9yZXNvbHZlc196b25lKCkgLT4gTm9uZToKICAgICIiImRpc2NvdmVyIG1lbXVhdCBab25lSW5mbygiQW1lcmljYS9Mb3NfQW5nZWxlcyIpIHNhYXQgZGlpbXBvci4KCiAgICBXaW5kb3dzIHRpZGFrIHB1bnlhIGRhdGFiYXNlIHpvbmEgd2FrdHUgSUFOQSBiYXdhYW4g4oCUIHRhbnBhIHBha2V0CiAgICBgdHpkYXRhYCAoZGlwaW4gZGkgcHlwcm9qZWN0ICsgbG9jaykgaW1wb3IgaW5pIG1lbGVkYWsgZGkgc2FuYSBkYW4KICAgIHNldGlhcCBydW4gYWt1biBsYW5nc3VuZyBtYXRpLgogICAgIiIiCiAgICBpbXBvcnQgdHpkYXRhCgogICAgZnJvbSBhcHAuc2l0ZXMuZ29vZ2xlX29uZSBpbXBvcnQgZGlzY292ZXIKCiAgICAjIERpIExpbnV4IGRpc2NvdmVyLnRvZGF5KCkgdGV0YXAgamFsYW4gZGFyaSAvdXNyL3NoYXJlL3pvbmVpbmZvIHdhbGF1CiAgICAjIHBha2V0bnlhIGhpbGFuZzsgcGluIGtlYmVyYWRhYW4gcGFrZXRueWEgc3VwYXlhIHZlbnYgdGFucGEgdHpkYXRhCiAgICAjIGdhZ2FsIGRpIHNpbmksIGJ1a2FuIG5hbnRpIGRpIFdpbmRvd3MuCiAgICBhc3NlcnQgdHpkYXRhLl9fZmlsZV9fLCAicGFrZXQgdHpkYXRhIHRpZGFrIHRlcnBhc2FuZyBkaSB2ZW52IGluaSIKICAgIGFzc2VydCBkaXNjb3Zlci50b2RheSgpLmlzb2Zvcm1hdCgpCgoKZGVmIF9wYXRjaGVkX3dpbjMyKGVudjogZGljdFtzdHIsIHN0cl0pOgogICAgIiIiUGF0Y2ggc3lzLnBsYXRmb3JtICsgZW52IFdpbmRvd3MgdW50dWsgc2F0dSBibG9rLCBwdWxpaGthbiBzZXN1ZGFobnlhLiIiIgogICAgc2F2ZWRfcGxhdGZvcm0gPSBzeXMucGxhdGZvcm0KICAgIHNhdmVkX2VudiA9IHtrOiBvcy5lbnZpcm9uLmdldChrKSBmb3IgayBpbiBlbnZ9CiAgICBzeXMucGxhdGZvcm0gPSAid2luMzIiCiAgICBvcy5lbnZpcm9uLnVwZGF0ZShlbnYpCiAgICByZXR1cm4gc2F2ZWRfcGxhdGZvcm0sIHNhdmVkX2VudgoKCmRlZiBfcmVzdG9yZV93aW4zMihzYXZlZDogdHVwbGVbc3RyLCBkaWN0W3N0ciwgc3RyIHwgTm9uZV1dKSAtPiBOb25lOgogICAgcGxhdGZvcm0sIGVudiA9IHNhdmVkCiAgICBzeXMucGxhdGZvcm0gPSBwbGF0Zm9ybQogICAgZm9yIGtleSwgdmFsdWUgaW4gZW52Lml0ZW1zKCk6CiAgICAgICAgaWYgdmFsdWUgaXMgTm9uZToKICAgICAgICAgICAgb3MuZW52aXJvbi5wb3Aoa2V5LCBOb25lKQogICAgICAgIGVsc2U6CiAgICAgICAgICAgIG9zLmVudmlyb25ba2V5XSA9IHZhbHVlCgoKZGVmIHRlc3Rfd2luMzJfZGF0YV9kaXJfc2ltdWxhdGlvbigpIC0+IE5vbmU6CiAgICAiIiJEaSBob3N0IG1hbmEgcHVuOiBwbGF0Zm9ybSB3aW4zMiArIExPQ0FMQVBQREFUQSBrdXN0b20gLT4gZGF0YSBkaXIgaWt1dC4iIiIKICAgIHNhdmVkID0gX3BhdGNoZWRfd2luMzIoeyJMT0NBTEFQUERBVEEiOiByIkQ6XFByb2ZpbFxMb2NhbCJ9KQogICAgdHJ5OgogICAgICAgIHBhdGggPSBfZGVmYXVsdF9kYXRhX2RpcigpCiAgICAgICAgYXNzZXJ0IHBhdGgubmFtZSA9PSAiR2FpQ29uc29sZSIKICAgICAgICBhc3NlcnQgc3RyKHBhdGgpLnJlcGxhY2UoIlxcIiwgIi8iKS5lbmRzd2l0aCgiUHJvZmlsL0xvY2FsL0dhaUNvbnNvbGUiKSwgcGF0aAogICAgZmluYWxseToKICAgICAgICBfcmVzdG9yZV93aW4zMihzYXZlZCkKCgpkZWYgdGVzdF93aW4zMl9icm93c2VyX3Jlc29sdXRpb25fc2ltdWxhdGlvbigpIC0+IE5vbmU6CiAgICAiIiJEaSBob3N0IG1hbmEgcHVuOiBjaHJvbWUuZXhlIGRpIHBvaG9uIGluc3RhbGFzaSBXaW5kb3dzIHBhbHN1IHRlcnBpbGloLiIiIgogICAgcm9vdCA9IFBhdGgodGVtcGZpbGUubWtkdGVtcChwcmVmaXg9ImdhaS13aW4zMi0iKSkKICAgIGNocm9tZV9leGUgPSByb290IC8gIlByb2dyYW0gRmlsZXMiIC8gIkdvb2dsZSIgLyAiQ2hyb21lIiAvICJBcHBsaWNhdGlvbiIgLyAiY2hyb21lLmV4ZSIKICAgIGNocm9tZV9leGUucGFyZW50Lm1rZGlyKHBhcmVudHM9VHJ1ZSkKICAgIGNocm9tZV9leGUud3JpdGVfYnl0ZXMoYiIiKQogICAgY2hyb21lX2V4ZS5jaG1vZCgwbzc1NSkKICAgIHNhdmVkID0gX3BhdGNoZWRfd2luMzIoCiAgICAgICAgewogICAgICAgICAgICAiUFJPR1JBTUZJTEVTIjogc3RyKHJvb3QgLyAiUHJvZ3JhbSBGaWxlcyIpLAogICAgICAgICAgICAiUFJPR1JBTUZJTEVTKFg4NikiOiBzdHIocm9vdCAvICJQcm9ncmFtIEZpbGVzICh4ODYpIiksCiAgICAgICAgICAgICJMT0NBTEFQUERBVEEiOiBzdHIocm9vdCAvICJMb2NhbCIpLAogICAgICAgIH0KICAgICkKICAgICMgc2h1dGlsLndoaWNoIG1lbWJhY2Egc3lzLnBsYXRmb3JtIGRhbiBtYXN1ayBqYWx1ciB3aW4zMiB5YW5nIGJ1dHVoCiAgICAjIG1vZHVsIGtodXN1cyBXaW5kb3dzOyBkaSBob3N0IG5vbi1XaW5kb3dzIHN0dWIgc2FqYSBwZW5jYXJpYW4gUEFUSC1ueWEKICAgICMgKHlhbmcgZGl1amkgZGkgc2luaSBwZW5lbXVhbiBkYXJpIHBvaG9uIGluc3RhbGFzaSwgYnVrYW4gUEFUSCkuCiAgICBzYXZlZF93aGljaCA9IGJyb3dzZXIuc2h1dGlsLndoaWNoCiAgICBicm93c2VyLnNodXRpbC53aGljaCA9IGxhbWJkYSBfbmFtZTogTm9uZQogICAgdHJ5OgogICAgICAgIGNob2ljZSA9IGJyb3dzZXIucmVzb2x2ZV9icm93c2VyKCkKICAgICAgICBhc3NlcnQgY2hvaWNlID09IHsiZXhlY3V0YWJsZV9wYXRoIjogc3RyKGNocm9tZV9leGUpfSwgY2hvaWNlCiAgICAgICAgYXNzZXJ0IGJyb3dzZXIuaGFzX2Rpc3BsYXkoKSBpcyBUcnVlCiAgICBmaW5hbGx5OgogICAgICAgIGJyb3dzZXIuc2h1dGlsLndoaWNoID0gc2F2ZWRfd2hpY2gKICAgICAgICBfcmVzdG9yZV93aW4zMihzYXZlZCkKCgpkZWYgdGVzdF93aW5fYnJvd3Nlcl9wYXRoc19zaGFwZSgpIC0+IE5vbmU6CiAgICAiIiJXaW5kb3dzIGRpc2NvdmVyeSBpcyBwdXJlIHBhdGggYnVpbGRpbmcg4oCUIHNoYXBlLWNoZWNrIGl0IG9uIGFueSBob3N0LiIiIgogICAgY2hyb21lLCBjaHJvbWl1bSA9IGJyb3dzZXIuX3dpbl9icm93c2VyX3BhdGhzKCkKICAgIGFzc2VydCBjaHJvbWUgYW5kIGNocm9taXVtCiAgICBhc3NlcnQgYWxsKHAuZW5kc3dpdGgoImNocm9tZS5leGUiKSBmb3IgcCBpbiBjaHJvbWUgKyBjaHJvbWl1bSkKICAgIGFzc2VydCBhbGwoIkNocm9tZSIgaW4gcCBmb3IgcCBpbiBjaHJvbWUpCiAgICBhc3NlcnQgYWxsKCJDaHJvbWl1bSIgaW4gcCBmb3IgcCBpbiBjaHJvbWl1bSkKCgpkZWYgdGVzdF9icm93c2VyX3Jlc29sdXRpb25fc2hhcGUoKSAtPiBOb25lOgogICAgY2hvaWNlID0gYnJvd3Nlci5yZXNvbHZlX2Jyb3dzZXIoKQogICAgYXNzZXJ0IGlzaW5zdGFuY2UoY2hvaWNlLCBkaWN0KQogICAgYXNzZXJ0IHNldChjaG9pY2UpIDw9IHsiY2hhbm5lbCIsICJleGVjdXRhYmxlX3BhdGgifQogICAgYXNzZXJ0IGFsbChpc2luc3RhbmNlKHYsIHN0cikgYW5kIHYgZm9yIHYgaW4gY2hvaWNlLnZhbHVlcygpKQogICAgYXNzZXJ0IGlzaW5zdGFuY2UoYnJvd3Nlci5oYXNfZGlzcGxheSgpLCBib29sKQogICAgYXNzZXJ0ICJoZWFkbGVzcyIgaW4gYnJvd3Nlci5kZXNjcmliZSgpIG9yICJoZWFkZWQiIGluIGJyb3dzZXIuZGVzY3JpYmUoKQoKCmRlZiB0ZXN0X2d1YXJkX2p1ZGdlX3RvZGF5X3Njb3BpbmcoKSAtPiBOb25lOgogICAgIiIiTW9uZXkgZ3VhcmQgZGluaWxhaSBkYXJpIHRhZ2loYW4gKmhhcmkgaW5pKiwgYnVrYW4gbm9sIGRpIG1hbmEgc2FqYS4iIiIKICAgIGZyb20gYXBwLnNpdGVzLmdvb2dsZV9vbmUgaW1wb3J0IGd1YXJkCgogICAgIyAoYSkgdHJpYWwgc2FoOiBoYXJpIGluaSAkMC4wMCwgaGFyZ2EgbWFzYSBkZXBhbiBkaXNlYnV0IC0+IGxvbG9zCiAgICB2ID0gZ3VhcmQuanVkZ2UoIlN0YXJ0IGZyZWUgdHJpYWwgwrcgRHVlIHRvZGF5ICQwLjAwIMK3IFRoZW4gJDE5Ljk5L21vbnRoIHN0YXJ0aW5nIERlYyA4LCAyMDI2IikKICAgIGFzc2VydCB2LnNhZmUsIHYKICAgICMgKGIpIHRhZ2loYW4gaGFyaSBpbmkgYnVrYW4gbm9sLCB3YWxhdSBhZGEgJDAuMDAgKHBhamFrKSAtPiBnYWdhbAogICAgdiA9IGd1YXJkLmp1ZGdlKCJTdWJzY3JpYmUgwrcgJDE5OS45OSBkdWUgdG9kYXkgKyAkMC4wMCB0YXgiKQogICAgYXNzZXJ0IG5vdCB2LnNhZmUsIHYKICAgICMgKGMpIHRla3Mga29zb25nIC8gdGFrIHRlcmJhY2EgLT4gZ2FnYWwgKGZhaWwgY2xvc2VkKQogICAgYXNzZXJ0IG5vdCBndWFyZC5qdWRnZSgiIikuc2FmZQogICAgYXNzZXJ0IG5vdCBndWFyZC5qdWRnZSgiICAgIikuc2FmZQogICAgYXNzZXJ0IG5vdCBndWFyZC5qdWRnZSgiZGlhbG9nIHRhbnBhIG5vbWluYWwgYXBhIHB1biIpLnNhZmUKICAgICMgKGQpIHRhZ2loYW4gaGFyaSBpbmkgYnVrYW4gbm9sIHRhbnBhIG5vbCBzYW1hIHNla2FsaSAtPiBnYWdhbAogICAgYXNzZXJ0IG5vdCBndWFyZC5qdWRnZSgiRHVlIHRvZGF5ICQ0OS45OSIpLnNhZmUKICAgICMgbm9taW5hbCBidWthbiBub2wgdGFucGEgbGFiZWwgaGFyaSBpbmkgJiB0YW5wYSBrb250ZWtzIG1hc2EgZGVwYW4gLT4gZ2FnYWwKICAgIGFzc2VydCBub3QgZ3VhcmQuanVkZ2UoIlRvdGFsICQxOTkuOTkgwrcgdGF4ICQwLjAwIikuc2FmZQogICAgIyBoYW55YSBoYXJnYSBtYXNhIGRlcGFuICsgbm9sIC0+IGxvbG9zCiAgICBhc3NlcnQgZ3VhcmQuanVkZ2UoIkR1ZSAkMC4wMCDCtyByZW5ld3MgYXQgJDE5Ljk5L21vbnRoIGFmdGVyIHRoZSB0cmlhbCIpLnNhZmUKICAgICMgbmVnYXNpIGJ1a2FuIHRhZ2loYW46ICJ3b24ndCBiZSBjaGFyZ2VkIHRvZGF5IiB0aWRhayBtZW5hbWJhdGthbiBub21pbmFsCiAgICB2ID0gZ3VhcmQuanVkZ2UoIllvdSB3b24ndCBiZSBjaGFyZ2VkIHRvZGF5IMK3ICQwLjAwIGR1ZSBhdCB0cmlhbCBlbmQgwrcgdGhlbiAkMTkuOTkvbW9udGgiKQogICAgYXNzZXJ0IHYuc2FmZSwgdgogICAgIyBkaWFsb2cgIlVwY29taW5nIGNoYXJnZXMiIGxheWVyIDItNDogdGlkYWsgYWRhIHRhbWJhdGFuIGhhcmkgaW5pIGRhbgogICAgIyAqc2VtdWEqIG5vbWluYWwgYnVrYW4tbm9sIHRlcmlrYXQgdGFuZ2dhbCBtdWxhaSBtYXNhIGRlcGFuIC0+IGxvbG9zCiAgICB2ID0gZ3VhcmQuanVkZ2UoCiAgICAgICAgIkdvb2dsZSBBSSBQcm8gKDIgVEIpIMK3IFVwY29taW5nIGNoYXJnZXMgwrcgU3RhcnRpbmcgTWF5IDgsIDIwMjcgJDEzLjk5L21vbnRoIgogICAgICAgICIgwrcgU3RhcnRpbmcgTWF5IDgsIDIwMjggJDE5Ljk5L21vbnRoIMK3IFN1YnNjcmliZSIKICAgICkKICAgIGFzc2VydCB2LnNhZmUsIHYKICAgICMgZGlhbG9nIGJlcmJheWFyIHBvbG9zIChUaWVyIEIgdGFucGEgcGVuYW5kYSBtdWxhaSk6IHNhdHVhbiBiZXJrYWxhCiAgICAjIC9tb250aCAmIC95ZWFyIHNlcnRhICJyZW5ld3MiIGJ1a2FuIHBlbnVuZGFhbiAtPiBnYWdhbAogICAgYXNzZXJ0IG5vdCBndWFyZC5qdWRnZSgKICAgICAgICAiR29vZ2xlIEFJIFBybyAoMiBUQikgwrcgJDE5Ljk5L21vbnRoIMK3IEJpbGxlZCBtb250aGx5IMK3IFN1YnNjcmliZSIKICAgICkuc2FmZQogICAgYXNzZXJ0IG5vdCBndWFyZC5qdWRnZSgKICAgICAgICAiU3Vic2NyaWJlIHRvIEdvb2dsZSBBSSBQcm8gwrcgJDE5OS45OS95ZWFyIMK3IEF1dG8tcmVuZXdzIG9uIE5vdiA4LCAyMDI3IgogICAgKS5zYWZlCiAgICAjICJUb2RheSAkWCI6IHRvZGF5IHRlbGFuamFuZyBtZW5hbWJhdGthbiBub21pbmFsIHNlc3VkYWhueWEKICAgIGFzc2VydCBub3QgZ3VhcmQuanVkZ2UoIlRvZGF5ICQxOS45OSIpLnNhZmUKICAgIHYgPSBndWFyZC5qdWRnZSgiMTItbW9udGggZnJlZSB0cmlhbCDCtyBUb2RheSAkMC4wMCDCtyAkMTkuOTkvbW9udGggYWZ0ZXIgdHJpYWwiKQogICAgYXNzZXJ0IHYuc2FmZSwgdgoKICAgICMgRGlhbG9nIGxheWVyIDIvMyBhc2xpIChydW4gMjAyNi0xMS0wOSk6IHJpbmNpYW4ga29tcG9uZW4gdGVyY2V0YWsKICAgICMgU0VURUxBSCB0b3RhbCBtYXNhIGRlcGFubnlhIOKAlCAiJDMxLjk4IiA9ICIkMTkuOTkiICsgIiQxMS45OSIg4oCUIGRhbgogICAgIyB0aWRhayBhZGEgdGFnaWhhbiBoYXJpIGluaSAtPiBsb2xvcyBsZXdhdCBhdHVyYW4gcmluY2lhbiBrb21wb25lbi4KICAgIGwyID0gKAogICAgICAgICJHb29nbGUgQUkgUHJvICg1IFRCKSArIFlvdVR1YmUgUHJlbWl1bSBJbmRpdmlkdWFsIEFkZCBPbiAiCiAgICAgICAgIlVwY29taW5nIGNoYXJnZXMgU3RhcnRpbmcgRGVjIDgsIDIwMjYgJDExLjk5L21vbnRoIGluY2x1ZGVzIHRheCBvZiAkMC4wMCAiCiAgICAgICAgIllvdVR1YmUgUHJlbWl1bSBJbmRpdmlkdWFsIEFkZCBPbiAkMTEuOTkgU3RhcnRpbmcgTWF5IDgsIDIwMjggJDMxLjk4L21vbnRoICIKICAgICAgICAiaW5jbHVkZXMgdGF4IG9mICQwLjAwIEdvb2dsZSBBSSBQcm8gKDUgVEIpICQxOS45OSBZb3VUdWJlIFByZW1pdW0gIgogICAgICAgICJJbmRpdmlkdWFsIEFkZCBPbiAkMTEuOTkgU3Vic2NyaWJpbmcgb24gUGxheSIKICAgICkKICAgIHYgPSBndWFyZC5qdWRnZShsMikKICAgIGFzc2VydCB2LnNhZmUsIHYKICAgIHYgPSBndWFyZC5qdWRnZShsMi5yZXBsYWNlKCJNYXkgOCwgMjAyOCIsICJOb3YgOCwgMjAyOCIpKQogICAgYXNzZXJ0IHYuc2FmZSwgdgogICAgIyB0b3RhbCBkaXViYWggLT4ganVtbGFoIHJpbmNpYW4gdGlkYWsgbGFnaSBjb2NvayAtPiBnYWdhbAogICAgYXNzZXJ0IG5vdCBndWFyZC5qdWRnZShsMi5yZXBsYWNlKCIkMzEuOTgiLCAiJDMwLjk4IikpLnNhZmUKICAgICMgbm9taW5hbCBla3N0cmEgdGFrIHRlcmplbGFza2FuIHNldGVsYWggcmluY2lhbiAtPiBnYWdhbAogICAgYXNzZXJ0IG5vdCBndWFyZC5qdWRnZShsMiArICIgwrcgQWN0aXZhdGlvbiAkNS4wMCIpLnNhZmUKICAgICMgYXR1cmFuIHJpbmNpYW4gdGlkYWsgbWVub2xvbmcgZGlhbG9nIGJlcmJheWFyIHBvbG9zIHlhbmcgZGl0YW1iYWgKICAgICMgcmluY2lhbiBrYXJhbmdhbjogdGFucGEgdG90YWwgbWFzYSBkZXBhbiB0ZXJpa2F0LCB0ZXRhcCBnYWdhbAogICAgYXNzZXJ0IG5vdCBndWFyZC5qdWRnZSgKICAgICAgICAiR29vZ2xlIEFJIFBybyAkMTkuOTkgwrcgWW91VHViZSBQcmVtaXVtICQxMS45OSDCtyBUb3RhbCAkMzEuOTggwrcgQmlsbGVkIG1vbnRobHkiCiAgICApLnNhZmUKCgpkZWYgdGVzdF9zYW1lX29yaWdpbl9ndWFyZCgpIC0+IE5vbmU6CiAgICAiIiJQT1NUIGxpbnRhcyBvcmlnaW4gZGl0b2xhazsgdGFucGEgT3JpZ2luIChjdXJsL0FQSSkgbG9sb3MgYmVyYmVrYWwgdG9rZW4uIiIiCiAgICBmcm9tIHR5cGVzIGltcG9ydCBTaW1wbGVOYW1lc3BhY2UKCiAgICBmcm9tIGZhc3RhcGkgaW1wb3J0IEhUVFBFeGNlcHRpb24KCiAgICBmcm9tIGFwcC5zZWN1cml0eSBpbXBvcnQgcmVxdWlyZV9zYW1lX29yaWdpbgoKICAgIGRlZiByZXEoaGVhZGVyczogZGljdFtzdHIsIHN0cl0pOgogICAgICAgIHJldHVybiBTaW1wbGVOYW1lc3BhY2UoaGVhZGVycz1oZWFkZXJzKQoKICAgIGFzeW5jIGRlZiBydW4oKSAtPiBOb25lOgogICAgICAgIGhvc3QgPSB7Imhvc3QiOiAiMTI3LjAuMC4xOjg3NjUifQogICAgICAgICMgdGFucGEgT3JpZ2luL1JlZmVyZXIgLT4gbG9sb3MKICAgICAgICBhd2FpdCByZXF1aXJlX3NhbWVfb3JpZ2luKHJlcShob3N0KSkKICAgICAgICAjIE9yaWdpbiAvIFJlZmVyZXIgc2UtaG9zdCBkZW5nYW4gaGVhZGVyIEhvc3QgLT4gbG9sb3MKICAgICAgICBhd2FpdCByZXF1aXJlX3NhbWVfb3JpZ2luKHJlcSh7Kipob3N0LCAib3JpZ2luIjogImh0dHA6Ly8xMjcuMC4wLjE6ODc2NSJ9KSkKICAgICAgICBhd2FpdCByZXF1aXJlX3NhbWVfb3JpZ2luKHJlcSh7Kipob3N0LCAicmVmZXJlciI6ICJodHRwOi8vMTI3LjAuMC4xOjg3NjUvIn0pKQogICAgICAgICMgaG9zdC9wb3J0IGxhaW4sIGF0YXUgT3JpZ2luICJudWxsIiAoc2FuZGJveGVkIGlmcmFtZSkgLT4gNDAzCiAgICAgICAgZm9yIGJhZCBpbiAoImh0dHA6Ly8xMjcuMC4wLjE6OTk5OSIsICJodHRwczovL2V2aWwuZXhhbXBsZSIsICJudWxsIik6CiAgICAgICAgICAgIHRyeToKICAgICAgICAgICAgICAgIGF3YWl0IHJlcXVpcmVfc2FtZV9vcmlnaW4ocmVxKHsqKmhvc3QsICJvcmlnaW4iOiBiYWR9KSkKICAgICAgICAgICAgZXhjZXB0IEhUVFBFeGNlcHRpb24gYXMgZXhjOgogICAgICAgICAgICAgICAgYXNzZXJ0IGV4Yy5zdGF0dXNfY29kZSA9PSA0MDMsIGV4Yy5zdGF0dXNfY29kZQogICAgICAgICAgICAgICAgY29udGludWUKICAgICAgICAgICAgcmFpc2UgQXNzZXJ0aW9uRXJyb3IoZiJvcmlnaW4ge2JhZCFyfSBsb2xvcyIpCgogICAgYXN5bmNpby5ydW4ocnVuKCkpCgoKZGVmIHRlc3RfbGF0ZXN0X2xvZ19yZWplY3RzX2JhZF9pZHMoKSAtPiBOb25lOgogICAgIiIiYWNjX2lkIG1lbnRhaCBkYXJpIFVSTCB0aWRhayBib2xlaCBsb2xvcyBqYWRpIHBvbGEgZ2xvYi4iIiIKICAgIGZyb20gYXBwLnJ1bm5lciBpbXBvcnQgcXVldWUKCiAgICBhc3NlcnQgcXVldWUubGF0ZXN0X2xvZygiLi4vZXRjL3Bhc3N3ZCIpIGlzIE5vbmUKICAgIGFzc2VydCBxdWV1ZS5sYXRlc3RfbG9nKCJhY2NfeHl6IikgaXMgTm9uZQogICAgYXNzZXJ0IHF1ZXVlLmxhdGVzdF9sb2coIioiKSBpcyBOb25lCiAgICAjIHBvbGEgc2FoIHRhcGkgYmVsdW0gYWRhIGxvZyB1bnR1a255YSAtPiBOb25lIGp1Z2EKICAgIGFzc2VydCBxdWV1ZS5sYXRlc3RfbG9nKCJhY2NfMDEyMzQ1Njc4OWFiIikgaXMgTm9uZQoKCmRlZiB0ZXN0X3ZhdWx0X2NhcmRfcm90YXRpb25fYW5kX3JlaW1wb3J0KCkgLT4gTm9uZToKICAgICIiImtpbGxfY2FyZCBtZW11dGFyIGFrdW4ga2Uga2FydHUgYWt0aWY7IHJlLWltcG9yIG1lbnllZ2Fya2FuIGFrdW4uIiIiCiAgICBmcm9tIGFwcCBpbXBvcnQgdmF1bHQKCiAgICBhc3luYyBkZWYgcnVuKCkgLT4gTm9uZToKICAgICAgICBhd2FpdCBkYi5taWdyYXRlKCkKICAgICAgICBvaywgbm90ZSA9IGF3YWl0IHZhdWx0LmFkZF9jYXJkKCI0MjQyNDI0MjQyNDI0MjQyIiwgIjEyIiwgIjMwIiwgIjEyMyIpCiAgICAgICAgYXNzZXJ0IG9rLCBub3RlCiAgICAgICAgb2ssIG5vdGUgPSBhd2FpdCB2YXVsdC5hZGRfY2FyZCgiNTU1NTU1NTU1NTU1NDQ0NCIsICIxMiIsICIzMCIsICIxMjMiKQogICAgICAgIGFzc2VydCBvaywgbm90ZQogICAgICAgIG9rLCBub3RlID0gYXdhaXQgdmF1bHQuYWRkX2FjY291bnQoInVqaUBleGFtcGxlLmNvbSIsICJwdy1sYW1hIiwgIiIpCiAgICAgICAgYXNzZXJ0IG9rLCBub3RlCiAgICAgICAgYWNjID0gYXdhaXQgZGIuZmV0Y2hfb25lKCJTRUxFQ1QgKiBGUk9NIGFjY291bnRzIFdIRVJFIGVtYWlsID0gJ3VqaUBleGFtcGxlLmNvbSciKQogICAgICAgIGFzc2VydCBhY2MgaXMgbm90IE5vbmUgYW5kIGFjY1siY2FyZF9pZCJdLCBhY2MKICAgICAgICBkZWFkID0gYWNjWyJjYXJkX2lkIl0KICAgICAgICBvdGhlcnMgPSBbY1siaWQiXSBmb3IgYyBpbiBhd2FpdCBkYi5mZXRjaF9hbGwoIlNFTEVDVCBpZCBGUk9NIGNhcmRzIikgaWYgY1siaWQiXSAhPSBkZWFkXQogICAgICAgIGFzc2VydCBsZW4ob3RoZXJzKSA9PSAxCgogICAgICAgIGF3YWl0IHZhdWx0LmtpbGxfY2FyZChkZWFkLCBkZWFkPVRydWUpCiAgICAgICAgYWNjID0gYXdhaXQgZGIuZmV0Y2hfb25lKCJTRUxFQ1QgKiBGUk9NIGFjY291bnRzIFdIRVJFIGVtYWlsID0gJ3VqaUBleGFtcGxlLmNvbSciKQogICAgICAgIGFzc2VydCBhY2NbImNhcmRfaWQiXSA9PSBvdGhlcnNbMF0sIGFjY1siY2FyZF9pZCJdCgogICAgICAgICMgaGlkdXBrYW4gbGFnaTogYmFja2ZpbGwgdGlkYWsgbWVuY3VyaSBha3VuIHlhbmcgc3VkYWggcHVueWEga2FydHUKICAgICAgICBhd2FpdCB2YXVsdC5raWxsX2NhcmQoZGVhZCwgZGVhZD1GYWxzZSkKICAgICAgICBhY2MgPSBhd2FpdCBkYi5mZXRjaF9vbmUoIlNFTEVDVCAqIEZST00gYWNjb3VudHMgV0hFUkUgZW1haWwgPSAndWppQGV4YW1wbGUuY29tJyIpCiAgICAgICAgYXNzZXJ0IGFjY1siY2FyZF9pZCJdID09IG90aGVyc1swXSwgYWNjWyJjYXJkX2lkIl0KCiAgICAgICAgIyByZS1pbXBvcjogc2VlZCB5YW5nIGR1bHUga29zb25nIGtpbmkgdGVydHVsaXMsIGZhaWxlZCAtPiBwZW5kaW5nLAogICAgICAgICMgcGVudWdhc2FuIGthcnR1IHRldGFwIHZhbGlkCiAgICAgICAgYXdhaXQgZGIuZXhlY3V0ZSgiVVBEQVRFIGFjY291bnRzIFNFVCBzdGF0dXMgPSAnZmFpbGVkJyBXSEVSRSBpZCA9ID8iLCAoYWNjWyJpZCJdLCkpCiAgICAgICAgb2ssIG5vdGUgPSBhd2FpdCB2YXVsdC5hZGRfYWNjb3VudCgidWppQGV4YW1wbGUuY29tIiwgInB3LWJhcnUiLCAiSkJTV1kzRFBFSFBLM1BYUCIpCiAgICAgICAgYXNzZXJ0IG5vdCBvayBhbmQgbm90ZS5lbmRzd2l0aCgiZGlwZXJiYXJ1aSIpLCBub3RlCiAgICAgICAgYWNjID0gYXdhaXQgZGIuZmV0Y2hfb25lKCJTRUxFQ1QgKiBGUk9NIGFjY291bnRzIFdIRVJFIGVtYWlsID0gJ3VqaUBleGFtcGxlLmNvbSciKQogICAgICAgIGFzc2VydCBhY2NbInN0YXR1cyJdID09ICJwZW5kaW5nIiwgYWNjWyJzdGF0dXMiXQogICAgICAgIGFzc2VydCBhY2NbInRvdHBfcmVmIl0gPT0gZiJ7YWNjWydpZCddfTp0b3RwIiwgYWNjWyJ0b3RwX3JlZiJdCiAgICAgICAgYXNzZXJ0IGFjY1siY2FyZF9pZCJdID09IG90aGVyc1swXSwgYWNjWyJjYXJkX2lkIl0KICAgICAgICBhc3NlcnQgdmF1bHQuc2VjcmV0X2dldChhY2NbInRvdHBfcmVmIl0pCgogICAgYXN5bmNpby5ydW4ocnVuKCkpCgoKZGVmIHRlc3RfbG9ja19jb3ZlcnNfcGxhdGZvcm1zKCkgLT4gTm9uZToKICAgICIiIkEgZGFyd2luLW9ubHkgbG9jayBpcyB3aGF0IGJyb2tlIExpbnV4IGluc3RhbGxzOyBrZWVwIGFsbCBwbGF0Zm9ybXMgaW4gaXQuIiIiCiAgICBsb2NrID0gUGF0aChfX2ZpbGVfXykucmVzb2x2ZSgpLnBhcmVudC5wYXJlbnQgLyAicmVxdWlyZW1lbnRzLmxvY2siCiAgICB0ZXh0ID0gbG9jay5yZWFkX3RleHQoZW5jb2Rpbmc9InV0Zi04IikKICAgIGFzc2VydCAiLS1oYXNoPXNoYTI1NjoiIGluIHRleHQKICAgIHRhZ3MgPSByZS5maW5kYWxsKHIiXiMgZmlsZXM6ICguKykkIiwgdGV4dCwgcmUuTVVMVElMSU5FKQogICAgYXNzZXJ0IGxlbih0YWdzKSA+PSAyMCwgZiJ7bGVuKHRhZ3MpfSBwYWNrYWdlIHRhZ3MiCiAgICBjb21iaW5lZCA9ICIgIi5qb2luKHRhZ3MpCiAgICBhc3NlcnQgImxpbnV4PSIgaW4gY29tYmluZWQsICJsb2NrIHBpbm5lZCBubyBsaW51eCB3aGVlbHMiCiAgICBhc3NlcnQgIm1hY29zPSIgaW4gY29tYmluZWQsICJsb2NrIHBpbm5lZCBubyBtYWNPUyB3aGVlbHMiCiAgICBhc3NlcnQgIndpbmRvd3M9IiBpbiBjb21iaW5lZCwgImxvY2sgcGlubmVkIG5vIHdpbmRvd3Mgd2hlZWxzIgoKCmRlZiBtYWluKCkgLT4gaW50OgogICAgZmFpbHVyZXMgPSAwCiAgICBmb3IgbmFtZSwgZm4gaW4gc29ydGVkKGdsb2JhbHMoKS5pdGVtcygpKToKICAgICAgICBpZiBuYW1lLnN0YXJ0c3dpdGgoInRlc3RfIikgYW5kIGNhbGxhYmxlKGZuKToKICAgICAgICAgICAgdHJ5OgogICAgICAgICAgICAgICAgZm4oKQogICAgICAgICAgICAgICAgcHJpbnQoZiJvayAgIHtuYW1lfSIpCiAgICAgICAgICAgIGV4Y2VwdCBFeGNlcHRpb24gYXMgZXhjOiAgIyBub3FhOiBCTEUwMDEKICAgICAgICAgICAgICAgIGZhaWx1cmVzICs9IDEKICAgICAgICAgICAgICAgIHByaW50KGYiRkFJTCB7bmFtZX06IHt0eXBlKGV4YykuX19uYW1lX199OiB7ZXhjfSIpCiAgICBwcmludCgiLS0tIiwgImFsbCBwYXNzZWQiIGlmIG5vdCBmYWlsdXJlcyBlbHNlIGYie2ZhaWx1cmVzfSBmYWlsZWQiKQogICAgcmV0dXJuIDEgaWYgZmFpbHVyZXMgZWxzZSAwCgoKaWYgX19uYW1lX18gPT0gIl9fbWFpbl9fIjoKICAgIHJhaXNlIFN5c3RlbUV4aXQobWFpbigpKQo=
+"""Self-test, stdlib only. Run: .venv/bin/python tests/selftest.py"""
+
+from __future__ import annotations
+
+import asyncio
+import os
+import re
+import sys
+import tempfile
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
+# Jangan sentuh data asli: uji jalan di direktori sementara.
+_TMP = Path(tempfile.mkdtemp(prefix="gai-selftest-"))
+os.environ["GAI_DATA_DIR"] = str(_TMP)
+
+from app import db, secrets, totp  # noqa: E402
+from app.config import _default_data_dir, settings  # noqa: E402
+from app.models import AccountCreate  # noqa: E402
+from app.runner import browser  # noqa: E402
+
+# RFC 6238 Appendix B: secret "12345678901234567890" (ASCII), SHA-1, 8 digits.
+RFC_SECRET = "GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ"
+
+
+def test_totp_rfc_vectors() -> None:
+    cases = {59: "287082", 1111111109: "081804", 1234567890: "005924", 2000000000: "279037"}
+    for at, expected in cases.items():
+        assert totp.code(RFC_SECRET, at=at) == expected, (at, totp.code(RFC_SECRET, at=at))
+
+
+def test_totp_shapes() -> None:
+    assert totp.code("") == ""
+    assert totp.code("not-base32!!") == ""
+    assert totp.code("jbsw y3dp ehpk 3pxp") != ""
+    assert 1 <= totp.seconds_left() <= 30
+    assert totp.wait_hint(at=0) == 0
+
+
+def test_email_normalisation() -> None:
+    a = AccountCreate(email="Some.One@Gmail.COM", password="x")
+    assert a.email == "some.one@gmail.com"
+    for bad in ("nope", "a@b", "@b.com", "a b@c.com"):
+        try:
+            AccountCreate(email=bad, password="x")
+        except Exception:
+            continue
+        raise AssertionError(f"accepted bad email {bad!r}")
+
+
+def test_secrets_roundtrip() -> None:
+    ref = "selftest:roundtrip"
+    secrets.delete(ref)
+    assert secrets.get(ref) == ""
+    secrets.put(ref, "p@ss-with-symbols-9=X")
+    assert secrets.get(ref) == "p@ss-with-symbols-9=X"
+    secrets.put(ref, "overwritten")
+    assert secrets.get(ref) == "overwritten"
+    secrets.delete(ref)
+    assert secrets.get(ref) == ""
+
+
+def test_db_migrate() -> None:
+    async def run() -> None:
+        await db.migrate()
+        await db.migrate()  # idempotent
+        row = await db.fetch_one("SELECT COUNT(*) AS n FROM accounts")
+        assert row is not None and row["n"] == 0
+        cols = {r["name"] for r in await db.fetch_all("PRAGMA table_info(accounts)")}
+        assert {"email", "secret_ref", "totp_ref", "step", "expiry_date"} <= cols
+
+    asyncio.run(run())
+
+
+def test_secret_backend_reported() -> None:
+    assert secrets.backend() in {"security", "secret-tool", "file"}
+    assert secrets.describe()
+
+
+def test_file_backend_roundtrip_and_mode() -> None:
+    """The fallback backend must work and must never be group/world readable."""
+    saved = secrets._backend
+    try:
+        secrets._backend = "file"
+        ref = "selftest:file"
+        secrets.put(ref, "nilai-rahasia")
+        assert secrets.get(ref) == "nilai-rahasia"
+        assert secrets.exists(ref)
+        path = settings.data_dir / "vault.json"
+        assert path.exists(), path
+        if sys.platform != "win32":
+            # Windows has no POSIX modes; the profile ACL is the protection.
+            assert path.stat().st_mode & 0o077 == 0, oct(path.stat().st_mode)
+        secrets.delete(ref)
+        assert secrets.get(ref) == ""
+    finally:
+        secrets._backend = saved
+
+
+def test_data_dir_follows_platform() -> None:
+    path = _default_data_dir()
+    assert path.name == "GaiConsole"
+    if sys.platform == "darwin":
+        assert "Library/Application Support" in path.as_posix()
+    elif sys.platform == "win32":
+        if not os.environ.get("LOCALAPPDATA"):
+            assert "AppData/Local" in path.as_posix(), path
+    elif not os.environ.get("XDG_DATA_HOME"):
+        assert path.as_posix().endswith(".local/share/GaiConsole"), path
+
+
+def test_headless_resolution() -> None:
+    saved_mode, saved_display = settings.headless, os.environ.get("DISPLAY")
+    try:
+        settings.headless = "1"
+        assert browser.resolve_headless(False) is True
+        settings.headless = "0"
+        assert browser.resolve_headless(None) is False
+        settings.headless = "auto"
+        if sys.platform.startswith("linux"):
+            os.environ.pop("DISPLAY", None)
+            os.environ.pop("WAYLAND_DISPLAY", None)
+            # headed was asked for, no display exists: headless is the only option
+            assert browser.resolve_headless(False) is True
+    finally:
+        settings.headless = saved_mode
+        if saved_display is not None:
+            os.environ["DISPLAY"] = saved_display
+
+
+def test_discover_today_resolves_zone() -> None:
+    """discover memuat ZoneInfo("America/Los_Angeles") saat diimpor.
+
+    Windows tidak punya database zona waktu IANA bawaan — tanpa paket
+    `tzdata` (dipin di pyproject + lock) impor ini meledak di sana dan
+    setiap run akun langsung mati.
+    """
+    import tzdata
+
+    from app.sites.google_one import discover
+
+    # Di Linux discover.today() tetap jalan dari /usr/share/zoneinfo walau
+    # paketnya hilang; pin keberadaan paketnya supaya venv tanpa tzdata
+    # gagal di sini, bukan nanti di Windows.
+    assert tzdata.__file__, "paket tzdata tidak terpasang di venv ini"
+    assert discover.today().isoformat()
+
+
+def _patched_win32(env: dict[str, str]):
+    """Patch sys.platform + env Windows untuk satu blok, pulihkan sesudahnya."""
+    saved_platform = sys.platform
+    saved_env = {k: os.environ.get(k) for k in env}
+    sys.platform = "win32"
+    os.environ.update(env)
+    return saved_platform, saved_env
+
+
+def _restore_win32(saved: tuple[str, dict[str, str | None]]) -> None:
+    platform, env = saved
+    sys.platform = platform
+    for key, value in env.items():
+        if value is None:
+            os.environ.pop(key, None)
+        else:
+            os.environ[key] = value
+
+
+def test_win32_data_dir_simulation() -> None:
+    """Di host mana pun: platform win32 + LOCALAPPDATA kustom -> data dir ikut."""
+    saved = _patched_win32({"LOCALAPPDATA": r"D:\Profil\Local"})
+    try:
+        path = _default_data_dir()
+        assert path.name == "GaiConsole"
+        assert str(path).replace("\\", "/").endswith("Profil/Local/GaiConsole"), path
+    finally:
+        _restore_win32(saved)
+
+
+def test_win32_browser_resolution_simulation() -> None:
+    """Di host mana pun: chrome.exe di pohon instalasi Windows palsu terpilih."""
+    root = Path(tempfile.mkdtemp(prefix="gai-win32-"))
+    chrome_exe = root / "Program Files" / "Google" / "Chrome" / "Application" / "chrome.exe"
+    chrome_exe.parent.mkdir(parents=True)
+    chrome_exe.write_bytes(b"")
+    chrome_exe.chmod(0o755)
+    saved = _patched_win32(
+        {
+            "PROGRAMFILES": str(root / "Program Files"),
+            "PROGRAMFILES(X86)": str(root / "Program Files (x86)"),
+            "LOCALAPPDATA": str(root / "Local"),
+        }
+    )
+    # shutil.which membaca sys.platform dan masuk jalur win32 yang butuh
+    # modul khusus Windows; di host non-Windows stub saja pencarian PATH-nya
+    # (yang diuji di sini penemuan dari pohon instalasi, bukan PATH).
+    saved_which = browser.shutil.which
+    browser.shutil.which = lambda _name: None
+    try:
+        choice = browser.resolve_browser()
+        assert choice == {"executable_path": str(chrome_exe)}, choice
+        assert browser.has_display() is True
+    finally:
+        browser.shutil.which = saved_which
+        _restore_win32(saved)
+
+
+def test_win_browser_paths_shape() -> None:
+    """Windows discovery is pure path building — shape-check it on any host."""
+    chrome, chromium = browser._win_browser_paths()
+    assert chrome and chromium
+    assert all(p.endswith("chrome.exe") for p in chrome + chromium)
+    assert all("Chrome" in p for p in chrome)
+    assert all("Chromium" in p for p in chromium)
+
+
+def test_browser_resolution_shape() -> None:
+    choice = browser.resolve_browser()
+    assert isinstance(choice, dict)
+    assert set(choice) <= {"channel", "executable_path"}
+    assert all(isinstance(v, str) and v for v in choice.values())
+    assert isinstance(browser.has_display(), bool)
+    assert "headless" in browser.describe() or "headed" in browser.describe()
+
+
+def test_guard_judge_today_scoping() -> None:
+    """Money guard dinilai dari tagihan *hari ini*, bukan nol di mana saja."""
+    from app.sites.google_one import guard
+
+    # (a) trial sah: hari ini $0.00, harga masa depan disebut -> lolos
+    v = guard.judge("Start free trial · Due today $0.00 · Then $19.99/month starting Dec 8, 2026")
+    assert v.safe, v
+    # (b) tagihan hari ini bukan nol, walau ada $0.00 (pajak) -> gagal
+    v = guard.judge("Subscribe · $199.99 due today + $0.00 tax")
+    assert not v.safe, v
+    # (c) teks kosong / tak terbaca -> gagal (fail closed)
+    assert not guard.judge("").safe
+    assert not guard.judge("   ").safe
+    assert not guard.judge("dialog tanpa nominal apa pun").safe
+    # (d) tagihan hari ini bukan nol tanpa nol sama sekali -> gagal
+    assert not guard.judge("Due today $49.99").safe
+    # nominal bukan nol tanpa label hari ini & tanpa konteks masa depan -> gagal
+    assert not guard.judge("Total $199.99 · tax $0.00").safe
+    # hanya harga masa depan + nol -> lolos
+    assert guard.judge("Due $0.00 · renews at $19.99/month after the trial").safe
+    # negasi bukan tagihan: "won't be charged today" tidak menambatkan nominal
+    v = guard.judge("You won't be charged today · $0.00 due at trial end · then $19.99/month")
+    assert v.safe, v
+    # dialog "Upcoming charges" layer 2-4: tidak ada tambatan hari ini dan
+    # *semua* nominal bukan-nol terikat tanggal mulai masa depan -> lolos
+    v = guard.judge(
+        "Google AI Pro (2 TB) · Upcoming charges · Starting May 8, 2027 $13.99/month"
+        " · Starting May 8, 2028 $19.99/month · Subscribe"
+    )
+    assert v.safe, v
+    # dialog berbayar polos (Tier B tanpa penanda mulai): satuan berkala
+    # /month & /year serta "renews" bukan penundaan -> gagal
+    assert not guard.judge(
+        "Google AI Pro (2 TB) · $19.99/month · Billed monthly · Subscribe"
+    ).safe
+    assert not guard.judge(
+        "Subscribe to Google AI Pro · $199.99/year · Auto-renews on Nov 8, 2027"
+    ).safe
+    # "Today $X": today telanjang menambatkan nominal sesudahnya
+    assert not guard.judge("Today $19.99").safe
+    v = guard.judge("12-month free trial · Today $0.00 · $19.99/month after trial")
+    assert v.safe, v
+
+    # Dialog layer 2/3 asli (run 2026-11-09): rincian komponen tercetak
+    # SETELAH total masa depannya — "$31.98" = "$19.99" + "$11.99" — dan
+    # tidak ada tagihan hari ini -> lolos lewat aturan rincian komponen.
+    l2 = (
+        "Google AI Pro (5 TB) + YouTube Premium Individual Add On "
+        "Upcoming charges Starting Dec 8, 2026 $11.99/month includes tax of $0.00 "
+        "YouTube Premium Individual Add On $11.99 Starting May 8, 2028 $31.98/month "
+        "includes tax of $0.00 Google AI Pro (5 TB) $19.99 YouTube Premium "
+        "Individual Add On $11.99 Subscribing on Play"
+    )
+    v = guard.judge(l2)
+    assert v.safe, v
+    v = guard.judge(l2.replace("May 8, 2028", "Nov 8, 2028"))
+    assert v.safe, v
+    # total diubah -> jumlah rincian tidak lagi cocok -> gagal
+    assert not guard.judge(l2.replace("$31.98", "$30.98")).safe
+    # nominal ekstra tak terjelaskan setelah rincian -> gagal
+    assert not guard.judge(l2 + " · Activation $5.00").safe
+    # aturan rincian tidak menolong dialog berbayar polos yang ditambah
+    # rincian karangan: tanpa total masa depan terikat, tetap gagal
+    assert not guard.judge(
+        "Google AI Pro $19.99 · YouTube Premium $11.99 · Total $31.98 · Billed monthly"
+    ).safe
+
+
+def test_same_origin_guard() -> None:
+    """POST lintas origin ditolak; tanpa Origin (curl/API) lolos berbekal token."""
+    from types import SimpleNamespace
+
+    from fastapi import HTTPException
+
+    from app.security import require_same_origin
+
+    def req(headers: dict[str, str]):
+        return SimpleNamespace(headers=headers)
+
+    async def run() -> None:
+        host = {"host": "127.0.0.1:8765"}
+        # tanpa Origin/Referer -> lolos
+        await require_same_origin(req(host))
+        # Origin / Referer se-host dengan header Host -> lolos
+        await require_same_origin(req({**host, "origin": "http://127.0.0.1:8765"}))
+        await require_same_origin(req({**host, "referer": "http://127.0.0.1:8765/"}))
+        # host/port lain, atau Origin "null" (sandboxed iframe) -> 403
+        for bad in ("http://127.0.0.1:9999", "https://evil.example", "null"):
+            try:
+                await require_same_origin(req({**host, "origin": bad}))
+            except HTTPException as exc:
+                assert exc.status_code == 403, exc.status_code
+                continue
+            raise AssertionError(f"origin {bad!r} lolos")
+
+    asyncio.run(run())
+
+
+def test_latest_log_rejects_bad_ids() -> None:
+    """acc_id mentah dari URL tidak boleh lolos jadi pola glob."""
+    from app.runner import queue
+
+    assert queue.latest_log("../etc/passwd") is None
+    assert queue.latest_log("acc_xyz") is None
+    assert queue.latest_log("*") is None
+    # pola sah tapi belum ada log untuknya -> None juga
+    assert queue.latest_log("acc_0123456789ab") is None
+
+
+def test_vault_card_rotation_and_reimport() -> None:
+    """kill_card memutar akun ke kartu aktif; re-impor menyegarkan akun."""
+    from app import vault
+
+    async def run() -> None:
+        await db.migrate()
+        ok, note = await vault.add_card("4242424242424242", "12", "30", "123")
+        assert ok, note
+        ok, note = await vault.add_card("5555555555554444", "12", "30", "123")
+        assert ok, note
+        ok, note = await vault.add_account("uji@example.com", "pw-lama", "")
+        assert ok, note
+        acc = await db.fetch_one("SELECT * FROM accounts WHERE email = 'uji@example.com'")
+        assert acc is not None and acc["card_id"], acc
+        dead = acc["card_id"]
+        others = [c["id"] for c in await db.fetch_all("SELECT id FROM cards") if c["id"] != dead]
+        assert len(others) == 1
+
+        await vault.kill_card(dead, dead=True)
+        acc = await db.fetch_one("SELECT * FROM accounts WHERE email = 'uji@example.com'")
+        assert acc["card_id"] == others[0], acc["card_id"]
+
+        # hidupkan lagi: backfill tidak mencuri akun yang sudah punya kartu
+        await vault.kill_card(dead, dead=False)
+        acc = await db.fetch_one("SELECT * FROM accounts WHERE email = 'uji@example.com'")
+        assert acc["card_id"] == others[0], acc["card_id"]
+
+        # re-impor: seed yang dulu kosong kini tertulis, failed -> pending,
+        # penugasan kartu tetap valid
+        await db.execute("UPDATE accounts SET status = 'failed' WHERE id = ?", (acc["id"],))
+        ok, note = await vault.add_account("uji@example.com", "pw-baru", "JBSWY3DPEHPK3PXP")
+        assert not ok and note.endswith("diperbarui"), note
+        acc = await db.fetch_one("SELECT * FROM accounts WHERE email = 'uji@example.com'")
+        assert acc["status"] == "pending", acc["status"]
+        assert acc["totp_ref"] == f"{acc['id']}:totp", acc["totp_ref"]
+        assert acc["card_id"] == others[0], acc["card_id"]
+        assert vault.secret_get(acc["totp_ref"])
+
+    asyncio.run(run())
+
+
+def test_lock_covers_platforms() -> None:
+    """A darwin-only lock is what broke Linux installs; keep all platforms in it."""
+    lock = Path(__file__).resolve().parent.parent / "requirements.lock"
+    text = lock.read_text(encoding="utf-8")
+    assert "--hash=sha256:" in text
+    tags = re.findall(r"^# files: (.+)$", text, re.MULTILINE)
+    assert len(tags) >= 20, f"{len(tags)} package tags"
+    combined = " ".join(tags)
+    assert "linux=" in combined, "lock pinned no linux wheels"
+    assert "macos=" in combined, "lock pinned no macOS wheels"
+    assert "windows=" in combined, "lock pinned no windows wheels"
+
+
+def main() -> int:
+    failures = 0
+    for name, fn in sorted(globals().items()):
+        if name.startswith("test_") and callable(fn):
+            try:
+                fn()
+                print(f"ok   {name}")
+            except Exception as exc:  # noqa: BLE001
+                failures += 1
+                print(f"FAIL {name}: {type(exc).__name__}: {exc}")
+    print("---", "all passed" if not failures else f"{failures} failed")
+    return 1 if failures else 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
