@@ -266,6 +266,30 @@ def test_guard_judge_today_scoping() -> None:
     v = guard.judge("12-month free trial · Today $0.00 · $19.99/month after trial")
     assert v.safe, v
 
+    # Dialog layer 2/3 asli (run 2026-11-09): rincian komponen tercetak
+    # SETELAH total masa depannya — "$31.98" = "$19.99" + "$11.99" — dan
+    # tidak ada tagihan hari ini -> lolos lewat aturan rincian komponen.
+    l2 = (
+        "Google AI Pro (5 TB) + YouTube Premium Individual Add On "
+        "Upcoming charges Starting Dec 8, 2026 $11.99/month includes tax of $0.00 "
+        "YouTube Premium Individual Add On $11.99 Starting May 8, 2028 $31.98/month "
+        "includes tax of $0.00 Google AI Pro (5 TB) $19.99 YouTube Premium "
+        "Individual Add On $11.99 Subscribing on Play"
+    )
+    v = guard.judge(l2)
+    assert v.safe, v
+    v = guard.judge(l2.replace("May 8, 2028", "Nov 8, 2028"))
+    assert v.safe, v
+    # total diubah -> jumlah rincian tidak lagi cocok -> gagal
+    assert not guard.judge(l2.replace("$31.98", "$30.98")).safe
+    # nominal ekstra tak terjelaskan setelah rincian -> gagal
+    assert not guard.judge(l2 + " · Activation $5.00").safe
+    # aturan rincian tidak menolong dialog berbayar polos yang ditambah
+    # rincian karangan: tanpa total masa depan terikat, tetap gagal
+    assert not guard.judge(
+        "Google AI Pro $19.99 · YouTube Premium $11.99 · Total $31.98 · Billed monthly"
+    ).safe
+
 
 def test_same_origin_guard() -> None:
     """POST lintas origin ditolak; tanpa Origin (curl/API) lolos berbekal token."""

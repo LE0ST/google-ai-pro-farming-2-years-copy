@@ -353,13 +353,30 @@ async def ensure_card(page: Page, acc_id: str) -> bool:
                 inputs = frame.locator("input:visible")
             await asyncio.sleep(0.4)
 
+            # Modal yang baru terbuka belum stabil menerima ketikan: run
+            # 2026-11-09 kehilangan hampir semua digit nomor (kolom berakhir
+            # berisi 2 digit) karena pengetikan mulai sebelum modal mapan.
+            await asyncio.sleep(2.5)
             for idx, value in enumerate(values):
                 field = inputs.nth(idx)
-                await field.click()
-                await field.fill("")
-                # Nomor kartu diformat ulang oleh Google sambil diketik, jadi lebih
-                # pelan dan diberi jeda supaya field berikutnya tidak bergeser.
-                await field.press_sequentially(value, delay=70 if idx == 0 else 45)
+                want = re.sub(r"\D", "", value)
+                for _try in range(3):
+                    await field.click()
+                    await field.fill("")
+                    # Nomor kartu diformat ulang oleh Google sambil diketik, jadi
+                    # lebih pelan dan diberi jeda supaya field berikutnya tidak
+                    # bergeser — lalu *dibaca kembali*: digit yang tidak melekat
+                    # diketik ulang, bukan diteruskan ke Save.
+                    await field.press_sequentially(value, delay=110 if idx == 0 else 60)
+                    await asyncio.sleep(0.6)
+                    try:
+                        got = re.sub(r"\D", "", await field.input_value())
+                    except Exception:
+                        got = ""
+                    if got == want:
+                        break
+                    say("KARTU", f"kolom {idx + 1} belum melekat "
+                                 f"({len(got)}/{len(want)} digit) — ketik ulang")
                 await asyncio.sleep(0.9 if idx == 0 else 0.45)
             if await inputs.count() >= 5:
                 try:
@@ -388,14 +405,23 @@ async def ensure_card(page: Page, acc_id: str) -> bool:
                 say("KARTU", "tombol simpan tidak ditemukan")
                 continue
 
+            stuck = 0
             for _ in range(25):
                 await asyncio.sleep(1.5)
                 text = await frame_text(page)
-                if "add payment method" not in text.lower() and (
-                    "today" in text.lower() or "free trial" in text.lower()
+                low = text.lower()
+                if "add payment method" not in low and (
+                    "today" in low or "free trial" in low
                 ):
                     say("KARTU", "kartu tersimpan, dialog kembali ke checkout")
                     return True
+                if "add credit or debit card" in low or "all fields are required" in low:
+                    # Save tidak menelan form (digit hilang dsb.) — jangan bakar
+                    # sisa jendela tunggu; langsung ke percobaan isi ulang.
+                    stuck += 1
+                    if stuck >= 7:
+                        say("KARTU", "form masih utuh setelah Save — isi ulang")
+                        break
             saved = True
         say("KARTU", "dialog tidak kembali setelah menyimpan" if saved
             else "kartu gagal terisi")
@@ -646,6 +672,8 @@ async def detach_on_google(page: Page, last4: str) -> bool:
         # it's you" di Play, "Verify it's you" di payments center).
         for _ in range(750):                      # ±300s, tanpa tunggu tetap
             if await any_text(page, "sure that it's you") or \
+                    await any_text(page, "make sure it's you") or \
+                    await any_text(page, "verify to see") or \
                     await any_text(page, "memastikan bahwa ini memang anda"):
                 # Re-auth hanya terkirim kalau tombolnya ditekan; kalau sesi sudah
                 # terverifikasi tombol ini memang tidak muncul lagi. Ini dicek lebih
@@ -673,7 +701,21 @@ async def detach_on_google(page: Page, last4: str) -> bool:
                     if await click_near(page, last4, 'text="Remove"', also="Remove") or \
                             await click_near(page, last4, 'text="Hapus"', also="Hapus"):
                         await asyncio.sleep(1.0)
+                    elif not tried_edit and (
+                        await has_text(page, 'text="Edit payment methods"')
+                        or await has_text(page, 'text="Edit metode pembayaran"')
+                    ):
+                        # Di halaman Play kartu tampil tanpa tombol Remove —
+                        # Remove-nya ada di payments center di balik tautan
+                        # Edit. Tanpa jatuh ke sini loop berputar sampai
+                        # timeout (kejadian run 2026-11-09).
+                        tried_edit = True
+                        await click_text(page, 'text="Edit payment methods"')
+                        await click_text(page, 'text="Edit metode pembayaran"')
+                        await asyncio.sleep(2.0)
             elif await any_text(page, "Add a payment") or \
+                    await any_text(page, "Add payment method") or \
+                    await any_text(page, "No payment methods yet") or \
                     await any_text(page, "Tambahkan metode pembayaran"):
                 # Daftar metode bayar sudah tampil (wallet maupun halaman Play) tapi
                 # kartunya tidak ada di situ — dengan nol kartu pun tautan edit hilang.

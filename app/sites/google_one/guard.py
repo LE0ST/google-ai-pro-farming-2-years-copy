@@ -14,6 +14,15 @@ no such evidence (the "Upcoming charges" shape of layers 2-4) every price
 must be preceded by an explicit start marker ("starting", "then", "after").
 A bare billing period is not a deferral: "$19.99/month · Billed monthly" is
 a paid dialog and fails.
+
+One dialog shape needs a itemisation rule: in the layers 2-4 "Upcoming
+charges" dialog the per-product prices ("Google AI Pro $19.99", "YouTube
+Premium $11.99") are printed *after* the combined future total they belong
+to ("Starting May 8, 2028 $31.98/month"), too far from any start marker to
+pass the scoping tests on their own. Such an amount counts as future-scoped
+only when it is part of an exact itemisation: at least two unexplained
+amounts directly following a scoped total and summing to it to the cent,
+with no other unexplained money after them. Anything else still fails.
 """
 
 from __future__ import annotations
@@ -125,6 +134,61 @@ def _start_scoped(flat: str, hit: tuple[int, int, str]) -> bool:
     return bool(_START_HINT.search(flat[max(0, start - 64):start]))
 
 
+def _value(raw: str) -> int | None:
+    """Parse a money string to cents; None when the shape is unrecognised.
+
+    Handles the formats the dialogs actually use: "$31.98", "$1,299.00"
+    (comma = thousands) and "0,00" (comma = decimal). Anything exotic
+    returns None so the itemisation rule simply does not apply.
+    """
+    token = re.search(r"[\d][\d.,]*", raw)
+    if not token:
+        return None
+    num = token.group(0).rstrip(".,")
+    if re.fullmatch(r"\d{1,3}(,\d{3})+(\.\d{1,2})?", num):
+        num = num.replace(",", "")
+    elif re.fullmatch(r"\d+,\d{1,2}", num):
+        num = num.replace(",", ".")
+    elif not re.fullmatch(r"\d+(\.\d{1,2})?", num):
+        return None
+    try:
+        return round(float(num) * 100)
+    except ValueError:
+        return None
+
+
+def _components_explain(
+    hits: list[tuple[int, int, str]], scoped: list[bool]
+) -> bool:
+    """True when every unexplained amount itemises one scoped total.
+
+    `scoped` is parallel to `hits` (only non-zero entries are consulted).
+    The unexplained non-zero amounts must all follow one scoped non-zero
+    total, be the only non-zero amounts after it, number at least two, and
+    sum to that total exactly. Zero amounts (tax lines) may interleave.
+    """
+    nonzero = [i for i, h in enumerate(hits) if not _is_zero(h[2])]
+    unexplained = [i for i in nonzero if not scoped[i]]
+    if not unexplained:
+        return False
+    first = unexplained[0]
+    total_idx = None
+    for i in reversed(nonzero):
+        if i < first and scoped[i]:
+            total_idx = i
+            break
+    if total_idx is None:
+        return False
+    after = [i for i in nonzero if i > total_idx]
+    if after != unexplained or len(unexplained) < 2:
+        return False
+    total = _value(hits[total_idx][2])
+    parts = [_value(hits[i][2]) for i in unexplained]
+    if total is None or any(p is None for p in parts):
+        return False
+    return sum(parts) == total  # type: ignore[arg-type]
+
+
 def judge(text: str) -> Verdict:
     flat = " ".join(text.split())
     if not flat:
@@ -155,9 +219,18 @@ def judge(text: str) -> Verdict:
     #     layer 2-4. Setiap nominal wajib didahului penanda mulai eksplisit
     #     (_start_scoped); satuan berkala saja tidak cukup, karena dialog
     #     berbayar polos pun berbentuk "$19.99/month · Billed monthly".
-    has_free_evidence = len(nonzero) < len(hits) or bool(FREE_WORD.search(flat))
-    if has_free_evidence and all(_future_scoped(flat, h) for h in nonzero):
-        return Verdict(True, amounts, "nominal bukan nol hanya harga masa depan")
-    if not has_free_evidence and all(_start_scoped(flat, h) for h in nonzero):
-        return Verdict(True, amounts, "semua nominal terikat penanda mulai masa depan")
+    nonzero_idx = [i for i, h in enumerate(hits) if not _is_zero(h[2])]
+    has_free_evidence = len(nonzero_idx) < len(hits) or bool(FREE_WORD.search(flat))
+    if has_free_evidence:
+        scoped = [_future_scoped(flat, h) for h in hits]
+        if all(scoped[i] for i in nonzero_idx):
+            return Verdict(True, amounts, "nominal bukan nol hanya harga masa depan")
+    else:
+        scoped = [_start_scoped(flat, h) for h in hits]
+        if all(scoped[i] for i in nonzero_idx):
+            return Verdict(True, amounts, "semua nominal terikat penanda mulai masa depan")
+    # Rincian komponen: nominal yang belum terjelaskan boleh jadi rincian
+    # persis dari satu total masa depan ("$31.98" = "$19.99" + "$11.99").
+    if _components_explain(hits, scoped):
+        return Verdict(True, amounts, "nominal tak terikat adalah rincian total masa depan")
     return Verdict(False, amounts, "ada nominal bukan nol tanpa label hari ini")
