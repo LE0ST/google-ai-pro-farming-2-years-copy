@@ -13,6 +13,9 @@ dependencies = [
     "aiosqlite>=0.20",
     "psutil>=6.0",
     "playwright>=1.48",
+    # Windows tidak punya database zona waktu IANA bawaan; zoneinfo memuatnya
+    # dari paket ini. Di Linux/macOS paketnya tidak terpakai tapi tidak rugi.
+    "tzdata>=2024.1",
 ]
 
 [tool.ruff]

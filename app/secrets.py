@@ -38,6 +38,7 @@ import shutil
 import subprocess
 import sys
 import threading
+import time
 from pathlib import Path
 
 from .config import settings
@@ -151,41 +152,81 @@ def _store_load() -> dict[str, str]:
 def _store_save(data: dict[str, str]) -> None:
     path = _store_path()
     path.parent.mkdir(parents=True, exist_ok=True)
-    tmp = path.with_suffix(".json.tmp")
+    # Nama tmp unik per proses: dua penulis tidak saling menimpa file temp.
+    tmp = path.with_name(f"{path.name}.{os.getpid()}.tmp")
     fd = os.open(tmp, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
     with os.fdopen(fd, "w", encoding="utf-8") as fh:
         json.dump(data, fh, ensure_ascii=False, sort_keys=True)
         fh.flush()
         os.fsync(fh.fileno())
-    os.replace(tmp, path)
+    if sys.platform == "win32":
+        # Di NTFS, pembaca yang sedang membuka vault bisa membuat os.replace
+        # gagal sesaat dengan PermissionError — coba lagi beberapa kali.
+        for attempt in range(10):
+            try:
+                os.replace(tmp, path)
+                break
+            except PermissionError:
+                if attempt == 9:
+                    raise
+                time.sleep(0.05)
+    else:
+        os.replace(tmp, path)
     try:
         path.chmod(0o600)
     except OSError:
         pass
 
 
+_store_thread_lock = threading.Lock()
+
+
 class _StoreLock:
-    """Read-modify-write under an advisory lock, so two writers cannot drop a key."""
+    """Read-modify-write under a lock, so two writers cannot drop a key.
+
+    A threading.Lock covers writers inside this process; the lock file adds
+    inter-process exclusion — fcntl.flock on POSIX, msvcrt.locking on Windows
+    (fcntl does not exist there, so the file lock used to be a no-op).
+    """
 
     def __enter__(self) -> None:
-        path = _store_path()
-        path.parent.mkdir(parents=True, exist_ok=True)
-        self._fh = open(path.with_suffix(".json.lock"), "a+")  # noqa: SIM115
+        _store_thread_lock.acquire()
         try:
-            import fcntl
+            path = _store_path()
+            path.parent.mkdir(parents=True, exist_ok=True)
+            self._fh = open(path.with_suffix(".json.lock"), "a+")  # noqa: SIM115
+            try:
+                if sys.platform == "win32":
+                    import msvcrt
 
-            fcntl.flock(self._fh.fileno(), fcntl.LOCK_EX)
-        except (ImportError, OSError):
-            pass
+                    self._fh.seek(0)
+                    msvcrt.locking(self._fh.fileno(), msvcrt.LK_LOCK, 1)
+                else:
+                    import fcntl
+
+                    fcntl.flock(self._fh.fileno(), fcntl.LOCK_EX)
+            except (ImportError, OSError):
+                pass
+        except BaseException:
+            _store_thread_lock.release()
+            raise
 
     def __exit__(self, *exc: object) -> None:
         try:
-            import fcntl
+            if sys.platform == "win32":
+                import msvcrt
 
-            fcntl.flock(self._fh.fileno(), fcntl.LOCK_UN)
+                self._fh.seek(0)
+                msvcrt.locking(self._fh.fileno(), msvcrt.LK_UNLCK, 1)
+            else:
+                import fcntl
+
+                fcntl.flock(self._fh.fileno(), fcntl.LOCK_UN)
         except (ImportError, OSError):
             pass
-        self._fh.close()
+        finally:
+            self._fh.close()
+            _store_thread_lock.release()
 
 
 def _file_put(ref: str, value: str) -> None:

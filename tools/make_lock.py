@@ -155,6 +155,10 @@ def verify() -> int:
         if "==" in stripped and not stripped.startswith("#"):
             current = stripped.split("==")[0].strip().lower()
             listed.setdefault(current, [])
+            # Paket ber-hash tunggal ditulis sebaris: `name==ver --hash=...`.
+            if "--hash=sha256:" in stripped:
+                digest = stripped.split("--hash=sha256:", 1)[1].split()[0]
+                listed[current].append(digest)
         elif stripped.startswith("--hash=sha256:"):
             listed.setdefault(current, []).append(stripped.split(":", 1)[1])
 
@@ -167,6 +171,10 @@ def verify() -> int:
         unknown = [h for h in hashes if h not in published.get(name, set())]
         if unknown:
             print(f"FAIL {name}: {len(unknown)} hashes not published on PyPI")
+            bad += 1
+        missing = published.get(name, set()) - set(hashes)
+        if missing:
+            print(f"FAIL {name}: {len(missing)} published hashes missing from the lock")
             bad += 1
     for name in published:
         if name not in listed:

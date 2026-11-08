@@ -68,6 +68,7 @@ def _win_browser_paths() -> tuple[tuple[str, ...], tuple[str, ...]]:
     chromium = (
         str(Path(local) / "Chromium" / "Application" / "chrome.exe"),
         str(Path(pf) / "Chromium" / "Application" / "chrome.exe"),
+        str(Path(pf86) / "Chromium" / "Application" / "chrome.exe"),
     )
     return chrome, chromium
 
@@ -75,7 +76,7 @@ def _win_browser_paths() -> tuple[tuple[str, ...], tuple[str, ...]]:
 def has_display() -> bool:
     if sys.platform == "darwin":
         return True
-    if sys.platform.startswith("win"):
+    if sys.platform == "win32":
         return True
     return bool(os.environ.get("DISPLAY") or os.environ.get("WAYLAND_DISPLAY"))
 
@@ -127,7 +128,9 @@ def resolve_browser() -> dict[str, Any]:
         return {"channel": "chrome"}
     if sys.platform == "win32":
         win_chrome, win_chromium = _win_browser_paths()
-        found = _first_executable((), win_chrome) or _first_executable((), win_chromium)
+        found = _first_executable(("chrome",), win_chrome) or _first_executable(
+            ("chromium",), win_chromium
+        )
         return {"executable_path": found} if found else {}
     chrome = _first_executable(_CHROME_NAMES, _CHROME_PATHS)
     if chrome:

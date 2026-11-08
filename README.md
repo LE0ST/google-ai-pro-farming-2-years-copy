@@ -313,7 +313,7 @@ app/
   config.py        settings, data dir per-OS, token console
   db.py            skema SQLite + migrasi idempoten
   vault.py         akun & kartu (nilai di vault)
-  secrets.py       backend secret: security / secret-tool / file 0600
+  secrets.py       backend secret: security / secret-tool / file 0600 (Windows: file, ACL profil user)
   totp.py          TOTP stdlib
   egress.py        cek negara egress
   runner/          browser (resolusi channel/headless), navigasi, antrean

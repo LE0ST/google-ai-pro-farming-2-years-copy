@@ -92,7 +92,10 @@ class Settings(BaseSettings):
                 return token
         token = secrets.token_urlsafe(32)
         path.write_text(token, encoding="ascii")
-        path.chmod(0o600)
+        try:
+            path.chmod(0o600)
+        except OSError:
+            pass
         self.console_token = token
         return token
 

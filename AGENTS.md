@@ -30,7 +30,7 @@ status cancel terverifikasi, kartu tidak tertinggal di akun.
 
 ## Prasyarat mesin
 
-- Python 3.11+, venv dibuat `run.sh` (Windows: `run.ps1`).
+- Python 3.12+, venv dibuat `run.sh` (Windows: `run.ps1`).
 - Egress internet dengan **negara US** (alur memverifikasi sendiri lewat
   ipwho.is dan berhenti kalau bukan US).
 - Mesin tanpa layar: pasang Xvfb. Google menolak login headless
@@ -44,7 +44,7 @@ status cancel terverifikasi, kartu tidak tertinggal di akun.
 
 ```bash
 ./run.sh --check                        # python, data dir, backend secret, browser
-.venv/bin/python tests/selftest.py      # harus 12/12
+.venv/bin/python tests/selftest.py      # harus 15/15
 ./run.sh                                # konsol di 127.0.0.1:8765
 curl -s localhost:8765/healthz          # {"ok":true,...}
 ```
