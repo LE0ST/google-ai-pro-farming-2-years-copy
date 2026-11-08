@@ -37,7 +37,7 @@ from playwright.async_api import Page, async_playwright  # noqa: E402
 from app import db, egress, secrets, vault  # noqa: E402
 from app.config import settings  # noqa: E402
 from app.runner import browser, nav  # noqa: E402
-from app.sites.google_one import checkout, discover, login  # noqa: E402
+from app.sites.google_one import checkout, discover, guard, login  # noqa: E402
 
 WANT = "US"
 PLAY = "https://play.google.com/store/account/subscriptions?hl=en"
@@ -65,7 +65,9 @@ def today() -> date:
     return datetime.now(ZoneInfo("America/Los_Angeles")).date()
 
 
-def near(got: list[date], expected: date, slack: int = 1) -> bool:
+def near(got: list[date], expected: date, slack: int = 5) -> bool:
+    # Slack 5 hari: layer berjarak ±180 hari, jadi tetap tak ambigu, tapi
+    # selisih akhir pekan / zona waktu pada tanggal proyeksi tidak menggagalkan.
     return any(abs((d - expected).days) <= slack for d in got)
 
 
@@ -298,6 +300,12 @@ async def ensure_card(page: Page, acc_id: str) -> bool:
     if not card:
         say("KARTU", "akun tidak punya kartu di vault")
         return False
+    if card["status"] != "active":
+        # Kartu mati tidak boleh ditempel walau penugasannya belum sempat
+        # diputar kill_card — menempelkannya hanya membuang satu run.
+        say("KARTU", f"kartu {card['brand']}-{card['last4']} berstatus {card['status']}, "
+                     "bukan active — berhenti")
+        return False
 
     number = vault.secret_get(card["number_ref"])
     cvc = vault.secret_get(card["cvc_ref"])
@@ -453,20 +461,27 @@ async def run_layers(page: Page, email: str, acc_id: str, layers: list[int], dry
 
         got = dates_in(text)
 
-        if layer == 1:
-            # A first-time account advertises the 12-month trial by name; one that
-            # already holds any plan only ever shows the date, so accept either.
-            ok = ("$0.00" in text) or ("12-month free trial" in text)
-            say("GUARD", f"layer 1: nol + label trial/plan → {'lolos' if ok else 'GAGAL'}")
-        elif layer == 4:
-            ok = near(got, add_months(discover.today(), 24)) or near(got, add_months(discover.today(), 30))
-            say("GUARD", f"layer 4: harap ±24/30 bulan · terbaca {got or '—'} → "
-                         f"{'lolos' if ok else 'GAGAL'}")
+        # Guard gabungan di semua layer: harga hari ini harus nol (guard.judge,
+        # terikat label "due today") DAN tanggal berakhir harus cocok. Dulu
+        # layer 1 hanya mengecek string "$0.00" dan layer 2-4 hanya tanggal —
+        # dialog yang menagih nyata bisa lolos dari salah satu sisi.
+        verdict = guard.judge(text)
+        if layer == 4:
+            expected = add_months(discover.today(), 24)
+            date_ok = near(got, expected) or near(got, add_months(discover.today(), 30))
+        elif layer == 1:
+            expected = add_months(discover.today(), 12)
+            # Akun pertama kali kadang mengiklankan trial-nya hanya dengan
+            # nama ("12-month free trial") tanpa tanggal kalender apa pun;
+            # nama itu cukup khas sebagai bukti tanggalnya.
+            date_ok = near(got, expected) or (not got and "12-month" in text.lower())
         else:
-            expected = add_months(discover.today(), 18 if layer == 2 else 24)
-            ok = near(got, expected)
-            say("GUARD", f"layer {layer}: harap ±{expected} · terbaca {got or '—'} → "
-                         f"{'lolos' if ok else 'GAGAL'}")
+            expected = add_months(discover.today(), {1: 12, 2: 18, 3: 24}[layer])
+            date_ok = near(got, expected)
+        ok = verdict.safe and date_ok
+        say("GUARD", f"layer {layer}: harga {'ok' if verdict.safe else 'GAGAL'} "
+                     f"({verdict.reason}) · tanggal harap ±{expected} · terbaca {got or '—'}"
+                     f" → {'lolos' if ok else 'GAGAL'}")
         if not ok:
             print("        " + text[:280])
             if capped and layer == 4:
@@ -696,6 +711,12 @@ async def release_card(page: Page, acc_id: str) -> None:
         return
     removed = await detach_on_google(page, row["last4"])
     say("KARTU", "dilepas dari akun" if removed else "pelepasan di Google tidak terbukti")
+    # Penugasan vault tetap dibersihkan (desain), tapi kegagalan di sisi Google
+    # harus terlihat di UI lewat step_message — bukan hanya di log run.
+    await db.execute(
+        "UPDATE accounts SET step_message = ? WHERE id = ?",
+        ("" if removed else "kartu belum terlepas di Google", acc_id),
+    )
     await db.execute("UPDATE accounts SET card_id = '' WHERE id = ?", (acc_id,))
     say("KARTU", "penugasan dilepas di vault — kartu tetap tersimpan")
 

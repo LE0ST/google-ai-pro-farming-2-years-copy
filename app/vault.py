@@ -105,7 +105,19 @@ async def add_account(email: str, password: str, seed: str) -> tuple[bool, str]:
         secret_put(f"{acc_id}:password", password)
         if seed:
             secret_put(f"{acc_id}:totp", totp.normalize(seed))
-        await db.execute("UPDATE accounts SET updated_at = ? WHERE id = ?", (now, acc_id))
+            # totp_ref harus ikut ditulis: akun yang pertama masuk tanpa seed
+            # kolomnya kosong, dan run melewatinya seolah tak punya TOTP.
+            await db.execute("UPDATE accounts SET totp_ref = ? WHERE id = ?",
+                             (f"{acc_id}:totp", acc_id))
+        # Re-impor adalah jalur pemulihan akun gagal: segarkan penugasan kartu
+        # (kartu lama bisa sudah mati) dan kembalikan failed -> pending.
+        await db.execute(
+            "UPDATE accounts SET updated_at = ?,"
+            " status = CASE WHEN status = 'failed' THEN 'pending' ELSE status END"
+            " WHERE id = ?",
+            (now, acc_id),
+        )
+        await attach_card(acc_id)
         return False, f"{email} sudah ada — diperbarui"
 
     acc_id = "acc_" + _rand.token_hex(6)
@@ -193,6 +205,12 @@ async def import_cards(blob: str) -> list[str]:
 async def kill_card(card_id: str, dead: bool = True) -> None:
     await db.execute("UPDATE cards SET status = ? WHERE id = ?",
                      ("dead" if dead else "active", card_id))
+    if dead:
+        # Lepas penugasan kartu mati sebelum backfill: tanpa ini akun tetap
+        # menunjuk kartu dead dan backfill (yang hanya mengisi card_id kosong)
+        # tidak pernah memutarnya ke kartu aktif.
+        await db.execute("UPDATE accounts SET card_id = '' WHERE card_id = ?", (card_id,))
+    await backfill_cards()
 
 
 async def delete_card(card_id: str) -> None:
@@ -281,15 +299,18 @@ async def accounts_view() -> list[dict[str, Any]]:
 
 
 async def cards_view() -> list[dict[str, Any]]:
-    rows = await db.fetch_all("SELECT * FROM cards ORDER BY created_at")
+    rows = await db.fetch_all(
+        "SELECT c.*, COUNT(a.id) AS used FROM cards c"
+        " LEFT JOIN accounts a ON a.card_id = c.id"
+        " GROUP BY c.id ORDER BY c.created_at"
+    )
     out = []
     for row in rows:
-        used = await db.fetch_one("SELECT COUNT(*) AS n FROM accounts WHERE card_id = ?", (row["id"],))
         out.append({
             "id": row["id"],
             "label": f"{row['brand']}-{row['last4']}",
             "exp": f"{row['exp_month']}/{row['exp_year']}",
             "status": row["status"],
-            "used": used["n"] if used else 0,
+            "used": row["used"],
         })
     return out

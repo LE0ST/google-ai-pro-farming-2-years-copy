@@ -63,22 +63,3 @@ def stage_for(months: int, slack: int = 1) -> Stage:
         if months >= threshold - slack:
             return Stage(1 if threshold == 0 else min(4, threshold // 6), months, label)
     return Stage(1, months, f"{months} bulan")
-
-
-def classify(dates: list[date], slack: int = 1) -> Stage:
-    """Map the dates seen in a dialog onto a stage.
-
-    Takes the *latest* date: an active subscription shows both the next add-on
-    charge and the term end, and only the latter moves when a layer lands.
-    """
-    if not dates:
-        return Stage(1, 0, "tidak ada tanggal (dianggap kosong)")
-
-    base = today()
-    best = max(dates)
-    months = months_from(base, best)
-    for threshold, label in reversed(STAGES):
-        if abs(months - threshold) <= slack or (threshold and months >= threshold):
-            start = 1 if threshold == 0 else threshold // 6
-            return Stage(min(4, start), months, label)
-    return Stage(1, months, f"tidak dikenali ({months} bulan)")

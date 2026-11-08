@@ -32,41 +32,6 @@ CREATE TABLE IF NOT EXISTS accounts (
     updated_at      INTEGER NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS runs (
-    id             TEXT PRIMARY KEY,
-    account_id     TEXT NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
-    started_at     INTEGER NOT NULL,
-    ended_at       INTEGER,
-    status         TEXT NOT NULL DEFAULT 'running',
-    start_step     INTEGER NOT NULL DEFAULT 1,
-    egress_ip      TEXT NOT NULL DEFAULT '',
-    egress_country TEXT NOT NULL DEFAULT '',
-    error          TEXT NOT NULL DEFAULT ''
-);
-
-CREATE TABLE IF NOT EXISTS artifacts (
-    id         TEXT PRIMARY KEY,
-    run_id     TEXT NOT NULL REFERENCES runs(id) ON DELETE CASCADE,
-    step       INTEGER NOT NULL DEFAULT 0,
-    kind       TEXT NOT NULL,
-    path       TEXT NOT NULL,
-    created_at INTEGER NOT NULL
-);
-
--- Single row. Card number and CVC are Keychain handles, not values.
-CREATE TABLE IF NOT EXISTS vault_card (
-    id         INTEGER PRIMARY KEY CHECK (id = 1),
-    exp_month  TEXT NOT NULL DEFAULT '',
-    exp_year   TEXT NOT NULL DEFAULT '',
-    holder     TEXT NOT NULL DEFAULT '',
-    postal_code TEXT NOT NULL DEFAULT '97201',
-    locality   TEXT NOT NULL DEFAULT 'Portland',
-    province   TEXT NOT NULL DEFAULT 'OR',
-    updated_at INTEGER NOT NULL DEFAULT 0
-);
-
-CREATE INDEX IF NOT EXISTS idx_runs_account ON runs(account_id);
-CREATE INDEX IF NOT EXISTS idx_artifacts_run ON artifacts(run_id);
 """
 
 # v2: cards as a rotating pool. The account line format is email|password|totp,
@@ -100,10 +65,6 @@ async def connect() -> aiosqlite.Connection:
     await conn.execute("PRAGMA journal_mode=WAL")
     await conn.execute("PRAGMA foreign_keys=ON")
     await conn.execute("PRAGMA busy_timeout=5000")
-    try:
-        settings.db_path.chmod(0o600)  # metadata akun; wal/shm ikut turunan
-    except OSError:
-        pass
     return conn
 
 
@@ -141,6 +102,13 @@ async def migrate() -> None:
             else:
                 await conn.execute("INSERT INTO schema_meta (version) VALUES (?)", (SCHEMA_VERSION,))
             await conn.commit()
+
+    # Sekali saat boot saja (dulu: setiap connect()). File DB berisi metadata
+    # akun; wal/shm ikut turunan mode-nya.
+    try:
+        settings.db_path.chmod(0o600)
+    except OSError:
+        pass
 
 
 async def fetch_all(sql: str, params: tuple[Any, ...] = ()) -> list[aiosqlite.Row]:

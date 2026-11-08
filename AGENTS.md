@@ -44,7 +44,7 @@ status cancel terverifikasi, kartu tidak tertinggal di akun.
 
 ```bash
 ./run.sh --check                        # python, data dir, backend secret, browser
-.venv/bin/python tests/selftest.py      # harus 15/15
+.venv/bin/python tests/selftest.py      # harus 19/19
 ./run.sh                                # konsol di 127.0.0.1:8765
 curl -s localhost:8765/healthz          # {"ok":true,...}
 ```

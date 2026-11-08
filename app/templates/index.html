@@ -239,11 +239,12 @@
         </td>
         <td>
           <span class="pill" data-status="{{ a.id }}">{{ a.status }}</span>
-          {% if a.step %}<span class="muted" data-step="{{ a.id }}"> · {{ a.step }}</span>{% endif %}
+          <span class="muted" data-step="{{ a.id }}">{% if a.step %} · {{ a.step }}{% endif %}</span>
+          <span class="muted" data-msg="{{ a.id }}">{{ a.message }}</span>
         </td>
         <td class="actions">
           <form method="post" action="/accounts/{{ a.id }}/run">
-            <button type="submit" {% if a.status == 'running' or a.status == 'subscribed' %}disabled{% endif %}>jalankan</button>
+            <button type="submit" data-run="{{ a.id }}" {% if a.status == 'running' or a.status == 'subscribed' %}disabled{% endif %}>jalankan</button>
           </form>
           <form method="post" action="/accounts/{{ a.id }}/delete"
                 data-confirm="hapus {{ a.email }}?">
@@ -444,10 +445,17 @@
       }
       const pill = by("data-status", id);
       if (pill && pill.textContent !== v.status) pill.textContent = v.status;
+      const runBtn = by("data-run", id);
+      if (runBtn) runBtn.disabled = (v.status === "running" || v.status === "subscribed");
       const step = by("data-step", id);
       if (step) {
         const want = v.step ? ` · ${v.step}` : "";
         if (step.dataset.v !== want) { step.dataset.v = want; step.textContent = want; }
+      }
+      const msg = by("data-msg", id);
+      if (msg) {
+        const wantMsg = v.message || "";
+        if (msg.textContent !== wantMsg) msg.textContent = wantMsg;
       }
     }
   }

@@ -15,7 +15,7 @@ from urllib.parse import quote
 from . import db, secrets, vault
 from .config import settings
 from .runner import browser, queue
-from .security import COOKIE_NAME, require_token
+from .security import COOKIE_NAME, require_same_origin, require_token
 
 log = logging.getLogger("gai")
 
@@ -39,6 +39,9 @@ async def lifespan(_: FastAPI) -> AsyncIterator[None]:
     settings.ensure_dirs()
     token = settings.load_or_create_token()
     await db.migrate()
+    # Proses yang mati di tengah run meninggalkan akun berstatus 'running'
+    # selamanya; tidak ada run yang hidup saat boot, jadi kembalikan.
+    await db.execute("UPDATE accounts SET status = 'pending' WHERE status = 'running'")
     queue.runner.start()
     log.warning("secret backend: %s", secrets.describe())
     log.warning("browser: %s", browser.describe())
@@ -49,6 +52,9 @@ async def lifespan(_: FastAPI) -> AsyncIterator[None]:
 def create_app() -> FastAPI:
     app = FastAPI(title="GaiConsole", lifespan=lifespan, docs_url=None, redoc_url=None)
     guard = [Depends(require_token)]
+    # POST juga Origin dicek: cookie token ikut terkirim pada form POST
+    # lintas-situs, jadi token saja tidak cukup menolak CSRF.
+    post_guard = [Depends(require_token), Depends(require_same_origin)]
 
     @app.get("/healthz")
     async def healthz() -> JSONResponse:
@@ -62,7 +68,18 @@ def create_app() -> FastAPI:
 
     @app.get("/", dependencies=guard)
     async def index(request: Request, msg: str = "", err: str = ""):
-        resp = templates.TemplateResponse(
+        if getattr(request.state, "set_cookie_token", None):
+            # Kunjungan pertama lewat ?t=: tukar token di URL dengan cookie,
+            # lalu redirect ke URL bersih supaya token tidak tertinggal di
+            # address bar, riwayat, atau log proxy.
+            dest = "/?" + "&".join(
+                f"{k}={quote(v)}" for k, v in (("msg", msg), ("err", err)) if v
+            )
+            resp = RedirectResponse(dest if len(dest) > 2 else "/", status_code=303)
+            resp.set_cookie(COOKIE_NAME, request.state.set_cookie_token,
+                            httponly=True, samesite="strict")
+            return resp
+        return templates.TemplateResponse(
             request,
             "index.html",
             {
@@ -74,9 +91,6 @@ def create_app() -> FastAPI:
                 "current": queue.runner.current,
             },
         )
-        if getattr(request.state, "set_cookie_token", None):
-            resp.set_cookie(COOKIE_NAME, request.state.set_cookie_token, httponly=True, samesite="strict")
-        return resp
 
     @app.get("/api/codes", dependencies=guard)
     async def codes() -> JSONResponse:
@@ -94,25 +108,32 @@ def create_app() -> FastAPI:
             return JSONResponse({"password": ""}, status_code=404)
         return JSONResponse({"password": vault.secret_get(row["secret_ref"])})
 
-    @app.post("/accounts/import", dependencies=guard)
+    @app.post("/accounts/import", dependencies=post_guard)
     async def accounts_import(blob: str = Form(default="")):
         notes = await vault.import_accounts(blob)
         added = sum(1 for n in notes if n.endswith("ditambahkan"))
-        unusable = len(notes) - added
-        text = f"{added} akun masuk" + (f", {unusable} dilewati" if unusable else "")
-        return _to(msg=text)
+        updated = sum(1 for n in notes if n.endswith("diperbarui"))
+        skipped = len(notes) - added - updated
+        parts = []
+        if added:
+            parts.append(f"{added} akun masuk")
+        if updated:
+            parts.append(f"{updated} diperbarui")
+        if skipped:
+            parts.append(f"{skipped} dilewati")
+        return _to(msg=", ".join(parts) if parts else "0 akun masuk")
 
-    @app.post("/accounts/add", dependencies=guard)
+    @app.post("/accounts/add", dependencies=post_guard)
     async def accounts_add(email: str = Form(...), password: str = Form(...), seed: str = Form(default="")):
         _, note = await vault.add_account(email, password, seed)
         return _to(msg=note)
 
-    @app.post("/accounts/{acc_id}/delete", dependencies=guard)
+    @app.post("/accounts/{acc_id}/delete", dependencies=post_guard)
     async def accounts_delete(acc_id: str):
         await vault.delete_account(acc_id)
         return _to(msg="akun dihapus")
 
-    @app.post("/cards/import", dependencies=guard)
+    @app.post("/cards/import", dependencies=post_guard)
     async def cards_import(blob: str = Form(default="")):
         notes = await vault.import_cards(blob)
         added = sum(1 for n in notes if n.endswith("ditambahkan"))
@@ -120,7 +141,7 @@ def create_app() -> FastAPI:
         text = f"{added} kartu masuk" + (f", {unusable} dilewati" if unusable else "")
         return _to(msg=text)
 
-    @app.post("/cards/add", dependencies=guard)
+    @app.post("/cards/add", dependencies=post_guard)
     async def cards_add(number: str = Form(...), exp: str = Form(...), cvc: str = Form(...)):
         parsed = vault.parse_card(f"{number}|{exp}|{cvc}")
         if not parsed:
@@ -128,32 +149,34 @@ def create_app() -> FastAPI:
         _, note = await vault.add_card(*parsed)
         return _to(msg=note)
 
-    @app.post("/cards/{card_id}/status", dependencies=guard)
+    @app.post("/cards/{card_id}/status", dependencies=post_guard)
     async def cards_status(card_id: str, dead: int = Form(...)):
         await vault.kill_card(card_id, dead=bool(dead))
         return _to(msg="status kartu diubah")
 
-    @app.post("/cards/{card_id}/delete", dependencies=guard)
+    @app.post("/cards/{card_id}/delete", dependencies=post_guard)
     async def cards_delete(card_id: str):
         await vault.delete_card(card_id)
         return _to(msg="kartu dihapus, akun dilepas")
 
     # ── runs ────────────────────────────────────────────────────────────────
-    @app.post("/accounts/{acc_id}/run", dependencies=guard)
+    @app.post("/accounts/{acc_id}/run", dependencies=post_guard)
     async def accounts_run(acc_id: str):
         ok = await queue.runner.submit(acc_id)
         return _to(msg='masuk antrean' if ok else 'sudah antre/running')
 
-    @app.post("/queue/run-all", dependencies=guard)
+    @app.post("/queue/run-all", dependencies=post_guard)
     async def queue_run_all():
         rows = await db.fetch_all(
-            "SELECT id FROM accounts WHERE status != 'subscribed' AND card_id != '' AND totp_ref != ''"
-            " ORDER BY created_at"
+            "SELECT a.id FROM accounts a WHERE a.status != 'subscribed' AND a.card_id != ''"
+            " AND a.totp_ref != ''"
+            " AND EXISTS (SELECT 1 FROM cards c WHERE c.id = a.card_id AND c.status = 'active')"
+            " ORDER BY a.created_at"
         )
         n = await queue.runner.submit_many([r["id"] for r in rows])
         return _to(msg=f"{n} akun masuk antrean")
 
-    @app.post("/queue/stop", dependencies=guard)
+    @app.post("/queue/stop", dependencies=post_guard)
     async def queue_stop():
         await queue.runner.stop()
         return _to(msg="stop dikirim")

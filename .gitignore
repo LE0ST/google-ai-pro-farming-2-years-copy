@@ -12,7 +12,7 @@ artifacts/
 profiles/
 console.token
 vault.json
-vault.json.tmp
+vault.json*.tmp
 vault.json.lock
 .wheelhouse/
 .env
