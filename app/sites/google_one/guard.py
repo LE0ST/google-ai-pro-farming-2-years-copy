@@ -36,6 +36,13 @@ _FUTURE_HINT = re.compile(
 # "You won't be charged today" adalah janji *tidak* menagih; label di
 # belakang negasi seperti ini tidak menambatkan nominal apa pun.
 _NEGATED = re.compile(r"(?:won'?t|will\s+not|never|not)\s+be\s*$|no\s+charge\s*$", re.IGNORECASE)
+# "Today $0.00": kata today telanjang tepat sebelum nominal juga menambatkan
+# nominal itu ke hari ini, walau tanpa label "due/total" di depannya.
+_TODAY_WORD = re.compile(r"\btoday\b", re.IGNORECASE)
+# Tapi today yang didahului penanda rentang bukan label tagihan: pada
+# "starting today …" / "free until today" kata itu menandai kapan harga
+# berkala mulai/berakhir, bukan tagihan hari ini.
+_BARE_SKIP = re.compile(r"(?:starting|until)\s*$", re.IGNORECASE)
 
 
 class Verdict:
@@ -64,7 +71,9 @@ def _today_amounts(flat: str, hits: list[tuple[int, int, str]]) -> list[str]:
     be mistaken for today's total.
     """
     found: list[str] = []
+    label_spans: list[tuple[int, int]] = []
     for label in TODAY_LABEL.finditer(flat):
+        label_spans.append((label.start(), label.end()))
         if _NEGATED.search(flat[max(0, label.start() - 30):label.start()]):
             continue
         after = [h for h in hits if label.end() <= h[0] <= label.end() + 48]
@@ -73,6 +82,17 @@ def _today_amounts(flat: str, hits: list[tuple[int, int, str]]) -> list[str]:
         before = [h for h in hits if label.start() - 24 <= h[1] <= label.start()]
         if before:
             found.append(before[-1][2])
+    # "Today $X": today telanjang menambatkan nominal terdekat sesudahnya.
+    # Lewati today yang sudah jadi bagian label di atas (sudah dihitung)
+    # dan yang didahului penanda rentang ("starting"/"until").
+    for word in _TODAY_WORD.finditer(flat):
+        if any(start <= word.start() < end for start, end in label_spans):
+            continue
+        if _BARE_SKIP.search(flat[max(0, word.start() - 30):word.start()]):
+            continue
+        after = [h for h in hits if word.end() <= h[0] <= word.end() + 24]
+        if after:
+            found.append(after[0][2])
     return found
 
 
@@ -102,8 +122,10 @@ def judge(text: str) -> Verdict:
     nonzero = [h for h in hits if not _is_zero(h[2])]
     if not nonzero:
         return Verdict(True, amounts, "terbaca total nol")
-    if all(_future_scoped(flat, h) for h in nonzero) and (
-        len(nonzero) < len(hits) or FREE_WORD.search(flat)
-    ):
+    # Tanpa tambatan hari ini, satu-satunya nominal bukan-nol yang boleh
+    # lolos adalah yang *semuanya* jelas harga masa depan: kalau setiap
+    # harga di dialog terikat tanggal/tarif mendatang, tidak ada yang
+    # ditagih hari ini (bentuk dialog "Upcoming charges" layer 2-4).
+    if all(_future_scoped(flat, h) for h in nonzero):
         return Verdict(True, amounts, "nominal bukan nol hanya harga masa depan")
     return Verdict(False, amounts, "ada nominal bukan nol tanpa label hari ini")

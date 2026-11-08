@@ -136,8 +136,14 @@ def test_discover_today_resolves_zone() -> None:
     `tzdata` (dipin di pyproject + lock) impor ini meledak di sana dan
     setiap run akun langsung mati.
     """
+    import tzdata
+
     from app.sites.google_one import discover
 
+    # Di Linux discover.today() tetap jalan dari /usr/share/zoneinfo walau
+    # paketnya hilang; pin keberadaan paketnya supaya venv tanpa tzdata
+    # gagal di sini, bukan nanti di Windows.
+    assert tzdata.__file__, "paket tzdata tidak terpasang di venv ini"
     assert discover.today().isoformat()
 
 
@@ -240,6 +246,58 @@ def test_guard_judge_today_scoping() -> None:
     # negasi bukan tagihan: "won't be charged today" tidak menambatkan nominal
     v = guard.judge("You won't be charged today · $0.00 due at trial end · then $19.99/month")
     assert v.safe, v
+    # dialog "Upcoming charges" layer 2-4: tidak ada tambatan hari ini dan
+    # *semua* nominal bukan-nol terikat tanggal mulai masa depan -> lolos
+    v = guard.judge(
+        "Google AI Pro (2 TB) · Upcoming charges · Starting May 8, 2027 $13.99/month"
+        " · Starting May 8, 2028 $19.99/month · Subscribe"
+    )
+    assert v.safe, v
+    # "Today $X": today telanjang menambatkan nominal sesudahnya
+    assert not guard.judge("Today $19.99").safe
+    v = guard.judge("12-month free trial · Today $0.00 · $19.99/month after trial")
+    assert v.safe, v
+
+
+def test_same_origin_guard() -> None:
+    """POST lintas origin ditolak; tanpa Origin (curl/API) lolos berbekal token."""
+    from types import SimpleNamespace
+
+    from fastapi import HTTPException
+
+    from app.security import require_same_origin
+
+    def req(headers: dict[str, str]):
+        return SimpleNamespace(headers=headers)
+
+    async def run() -> None:
+        host = {"host": "127.0.0.1:8765"}
+        # tanpa Origin/Referer -> lolos
+        await require_same_origin(req(host))
+        # Origin / Referer se-host dengan header Host -> lolos
+        await require_same_origin(req({**host, "origin": "http://127.0.0.1:8765"}))
+        await require_same_origin(req({**host, "referer": "http://127.0.0.1:8765/"}))
+        # host/port lain, atau Origin "null" (sandboxed iframe) -> 403
+        for bad in ("http://127.0.0.1:9999", "https://evil.example", "null"):
+            try:
+                await require_same_origin(req({**host, "origin": bad}))
+            except HTTPException as exc:
+                assert exc.status_code == 403, exc.status_code
+                continue
+            raise AssertionError(f"origin {bad!r} lolos")
+
+    asyncio.run(run())
+
+
+def test_latest_log_rejects_bad_ids() -> None:
+    """acc_id mentah dari URL tidak boleh lolos jadi pola glob."""
+    from app.runner import queue
+
+    assert queue.latest_log("../etc/passwd") is None
+    assert queue.latest_log("acc_xyz") is None
+    assert queue.latest_log("*") is None
+    # pola sah tapi belum ada log untuknya -> None juga
+    assert queue.latest_log("acc_0123456789ab") is None
 
 
 def test_vault_card_rotation_and_reimport() -> None:

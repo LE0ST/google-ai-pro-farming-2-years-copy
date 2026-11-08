@@ -239,7 +239,8 @@
         </td>
         <td>
           <span class="pill" data-status="{{ a.id }}">{{ a.status }}</span>
-          {% if a.step %}<span class="muted" data-step="{{ a.id }}"> · {{ a.step }}</span>{% endif %}
+          <span class="muted" data-step="{{ a.id }}">{% if a.step %} · {{ a.step }}{% endif %}</span>
+          <span class="muted" data-msg="{{ a.id }}">{{ a.message }}</span>
         </td>
         <td class="actions">
           <form method="post" action="/accounts/{{ a.id }}/run">
@@ -450,6 +451,11 @@
       if (step) {
         const want = v.step ? ` · ${v.step}` : "";
         if (step.dataset.v !== want) { step.dataset.v = want; step.textContent = want; }
+      }
+      const msg = by("data-msg", id);
+      if (msg) {
+        const wantMsg = v.message || "";
+        if (msg.textContent !== wantMsg) msg.textContent = wantMsg;
       }
     }
   }

@@ -70,17 +70,16 @@ class Runner:
     async def stop(self) -> None:
         self.stopping = True
         if self.proc and self.proc.returncode is None:
-            if sys.platform == "win32":
-                # TerminateProcess hanya membunuh proses runner; driver
-                # Playwright dan Chrome di bawahnya jadi yatim dan mengunci
-                # profil. Bunuh seluruh pohon prosesnya.
-                await asyncio.to_thread(_kill_tree, self.proc.pid)
-            else:
-                self.proc.terminate()
+            self.proc.terminate()
             try:
                 await asyncio.wait_for(self.proc.wait(), timeout=15)
             except asyncio.TimeoutError:
-                self.proc.kill()
+                # terminate() yang tidak mempan tidak cukup: di Windows ia
+                # hanya membunuh runner (driver Playwright + Chrome jadi
+                # yatim dan mengunci profil), di POSIX anak yang bandel pun
+                # bisa tertinggal. Eskalasi: bunuh seluruh pohon prosesnya.
+                await asyncio.to_thread(_kill_tree, self.proc.pid)
+                await self.proc.wait()
 
     # ── run ─────────────────────────────────────────────────────────────────
     async def _run(self, acc_id: str) -> None:
@@ -125,10 +124,7 @@ class Runner:
                 # bunuh pohon prosesnya (Chrome ikut di bawah runner) dan
                 # tandai gagal — bukan cancelled, itu untuk stop dari user.
                 timed_out = True
-                if sys.platform == "win32":
-                    await asyncio.to_thread(_kill_tree, self.proc.pid)
-                else:
-                    self.proc.kill()
+                await asyncio.to_thread(_kill_tree, self.proc.pid)
                 await self.proc.wait()
 
         if timed_out:
@@ -151,7 +147,7 @@ class Runner:
 
 
 def _kill_tree(pid: int) -> None:
-    """Kill a process and its children, recursively (Windows stop path)."""
+    """Kill a process and its children, recursively (stop/timeout path)."""
     import psutil
 
     try:

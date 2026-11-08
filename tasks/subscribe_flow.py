@@ -469,6 +469,12 @@ async def run_layers(page: Page, email: str, acc_id: str, layers: list[int], dry
         if layer == 4:
             expected = add_months(discover.today(), 24)
             date_ok = near(got, expected) or near(got, add_months(discover.today(), 30))
+        elif layer == 1:
+            expected = add_months(discover.today(), 12)
+            # Akun pertama kali kadang mengiklankan trial-nya hanya dengan
+            # nama ("12-month free trial") tanpa tanggal kalender apa pun;
+            # nama itu cukup khas sebagai bukti tanggalnya.
+            date_ok = near(got, expected) or (not got and "12-month" in text.lower())
         else:
             expected = add_months(discover.today(), {1: 12, 2: 18, 3: 24}[layer])
             date_ok = near(got, expected)
