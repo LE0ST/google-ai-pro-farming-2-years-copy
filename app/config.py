@@ -14,15 +14,22 @@ APP_NAME = "GaiConsole"
 
 
 def _default_data_dir() -> Path:
-    """Per-OS data home: macOS Application Support, elsewhere XDG.
+    """Per-OS data home: macOS Application Support, Windows LOCALAPPDATA,
+    elsewhere XDG.
 
     macOS keeps the familiar ``~/Library/Application Support/GaiConsole``.
     Linux follows the XDG base-directory spec, so a snap, a systemd unit and an
     interactive shell all resolve the same directory:
     ``$XDG_DATA_HOME/GaiConsole`` (default ``~/.local/share/GaiConsole``).
+    Windows uses ``%LOCALAPPDATA%\\GaiConsole`` — per-user, never roaming, and
+    already ACL'd to the owning user, which is what the file secret backend
+    relies on in place of POSIX modes.
     """
     if sys.platform == "darwin":
         return Path.home() / "Library" / "Application Support" / APP_NAME
+    if sys.platform == "win32":
+        base = os.environ.get("LOCALAPPDATA") or (Path.home() / "AppData" / "Local")
+        return Path(base) / APP_NAME
     base = os.environ.get("XDG_DATA_HOME") or (Path.home() / ".local" / "share")
     return Path(base) / APP_NAME
 

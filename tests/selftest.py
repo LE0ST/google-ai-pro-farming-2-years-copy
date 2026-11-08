@@ -89,7 +89,9 @@ def test_file_backend_roundtrip_and_mode() -> None:
         assert secrets.exists(ref)
         path = settings.data_dir / "vault.json"
         assert path.exists(), path
-        assert path.stat().st_mode & 0o077 == 0, oct(path.stat().st_mode)
+        if sys.platform != "win32":
+            # Windows has no POSIX modes; the profile ACL is the protection.
+            assert path.stat().st_mode & 0o077 == 0, oct(path.stat().st_mode)
         secrets.delete(ref)
         assert secrets.get(ref) == ""
     finally:
@@ -101,6 +103,8 @@ def test_data_dir_follows_platform() -> None:
     assert path.name == "GaiConsole"
     if sys.platform == "darwin":
         assert "Library/Application Support" in path.as_posix()
+    elif sys.platform == "win32":
+        assert "AppData/Local" in path.as_posix(), path
     elif not os.environ.get("XDG_DATA_HOME"):
         assert path.as_posix().endswith(".local/share/GaiConsole"), path
 
@@ -124,6 +128,15 @@ def test_headless_resolution() -> None:
             os.environ["DISPLAY"] = saved_display
 
 
+def test_win_browser_paths_shape() -> None:
+    """Windows discovery is pure path building — shape-check it on any host."""
+    chrome, chromium = browser._win_browser_paths()
+    assert chrome and chromium
+    assert all(p.endswith("chrome.exe") for p in chrome + chromium)
+    assert all("Chrome" in p for p in chrome)
+    assert all("Chromium" in p for p in chromium)
+
+
 def test_browser_resolution_shape() -> None:
     choice = browser.resolve_browser()
     assert isinstance(choice, dict)
@@ -133,8 +146,8 @@ def test_browser_resolution_shape() -> None:
     assert "headless" in browser.describe() or "headed" in browser.describe()
 
 
-def test_lock_covers_linux() -> None:
-    """A darwin-only lock is what broke Linux installs; keep both platforms in it."""
+def test_lock_covers_platforms() -> None:
+    """A darwin-only lock is what broke Linux installs; keep all platforms in it."""
     lock = Path(__file__).resolve().parent.parent / "requirements.lock"
     text = lock.read_text(encoding="utf-8")
     assert "--hash=sha256:" in text
@@ -143,7 +156,7 @@ def test_lock_covers_linux() -> None:
     combined = " ".join(tags)
     assert "linux=" in combined, "lock pinned no linux wheels"
     assert "macos=" in combined, "lock pinned no macOS wheels"
-    assert "win" not in combined, "windows artifacts should not be pinned"
+    assert "windows=" in combined, "lock pinned no windows wheels"
 
 
 def main() -> int:

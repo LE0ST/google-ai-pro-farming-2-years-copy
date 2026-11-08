@@ -1,5 +1,12 @@
 """Secret storage: macOS Keychain, Linux Secret Service, file as last resort.
 
+Windows has no OS keyring CLI to shell out to, so `auto` lands on the file
+backend there — ``vault.json`` inside ``%LOCALAPPDATA%\\GaiConsole``. POSIX
+modes do not exist on Windows; protection comes from the user profile's ACL
+(only the owning user, plus admins, can read their own LocalAppData). Same
+weaker-than-a-keyring caveat as any file-backend host, and ``describe()``
+says so instead of claiming 0600.
+
 One API, three backends — chosen once per process:
 
 * ``security`` — Apple's own CLI, ships with macOS. The value goes in over
@@ -221,10 +228,14 @@ def backend() -> str:
 
 
 def describe() -> str:
+    if sys.platform == "win32":
+        file_label = f"file (ACL profil user), no keyring — {_store_path()}"
+    else:
+        file_label = f"file 0600, no keyring — {_store_path()}"
     return {
         "security": "macOS Keychain (security CLI)",
         "secret-tool": "Secret Service (libsecret secret-tool)",
-        "file": f"file 0600, no keyring — {_store_path()}",
+        "file": file_label,
     }[backend()]
 
 

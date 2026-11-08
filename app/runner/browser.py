@@ -1,6 +1,6 @@
 """Persistent Chrome context. One profile dir per account, never shared.
 
-Browser resolution is the one place the two platforms genuinely differ:
+Browser resolution is the one place the platforms genuinely differ:
 
 * macOS: Google Chrome lives at ``/Applications/Google Chrome.app`` and
   Playwright reaches it with ``channel="chrome"``.
@@ -8,10 +8,15 @@ Browser resolution is the one place the two platforms genuinely differ:
   distro ``chromium``, a snap, or nothing at all. Playwright's ``channel``
   cannot point at an arbitrary binary, so a discovered Chromium is passed as
   ``executable_path`` and the bundled browser is the last resort.
+* Windows: installers do not put Chrome on PATH either; it lives under
+  ``%ProgramFiles%`` (or ``%LocalAppData%`` for a per-user install). Same
+  treatment as a discovered Linux Chromium: pass the ``chrome.exe`` path as
+  ``executable_path``, bundled browser as the last resort.
 
 Display resolution is the other: a desktop runs headed, a server has no
 ``DISPLAY`` and must run headless, or every launch dies with
-"Missing X server or $DISPLAY".
+"Missing X server or $DISPLAY". Windows desktops are always headed — there
+is no Xvfb dance to do there.
 """
 
 from __future__ import annotations
@@ -43,6 +48,28 @@ _CHROME_NAMES = ("google-chrome", "google-chrome-stable")
 _CHROMIUM_NAMES = ("chromium", "chromium-browser")
 _CHROME_PATHS = ("/opt/google/chrome/chrome", "/opt/google/chrome/google-chrome")
 _CHROMIUM_PATHS = ("/snap/bin/chromium", "/usr/lib/chromium/chromium")
+
+
+def _win_browser_paths() -> tuple[tuple[str, ...], tuple[str, ...]]:
+    """Standard Windows install locations for Chrome and Chromium.
+
+    Built at call time from the environment: ``%ProgramFiles%`` for machine
+    installs, ``%LocalAppData%`` for per-user ones. os.access(X_OK) on Windows
+    degrades to an existence check, which is all an .exe needs.
+    """
+    pf = os.environ.get("PROGRAMFILES") or r"C:\Program Files"
+    pf86 = os.environ.get("PROGRAMFILES(X86)") or r"C:\Program Files (x86)"
+    local = os.environ.get("LOCALAPPDATA") or str(Path.home() / "AppData" / "Local")
+    chrome = (
+        str(Path(pf) / "Google" / "Chrome" / "Application" / "chrome.exe"),
+        str(Path(pf86) / "Google" / "Chrome" / "Application" / "chrome.exe"),
+        str(Path(local) / "Google" / "Chrome" / "Application" / "chrome.exe"),
+    )
+    chromium = (
+        str(Path(local) / "Chromium" / "Application" / "chrome.exe"),
+        str(Path(pf) / "Chromium" / "Application" / "chrome.exe"),
+    )
+    return chrome, chromium
 
 
 def has_display() -> bool:
@@ -98,6 +125,10 @@ def resolve_browser() -> dict[str, Any]:
     # auto
     if sys.platform == "darwin" and Path("/Applications/Google Chrome.app").exists():
         return {"channel": "chrome"}
+    if sys.platform == "win32":
+        win_chrome, win_chromium = _win_browser_paths()
+        found = _first_executable((), win_chrome) or _first_executable((), win_chromium)
+        return {"executable_path": found} if found else {}
     chrome = _first_executable(_CHROME_NAMES, _CHROME_PATHS)
     if chrome:
         return {"channel": "chrome"}
