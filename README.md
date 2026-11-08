@@ -1,13 +1,14 @@
 # GaiConsole
 
-Konsol lokal (`127.0.0.1`) untuk otomasi browser multi-akun. Jalan di **macOS**
-dan **Ubuntu/Linux**: Chrome asli kalau ada, Chromium sistem kalau tidak,
-browser bawaan Playwright sebagai jaring terakhir.
+Konsol lokal (`127.0.0.1`) untuk otomasi browser multi-akun. Jalan di **macOS**,
+**Ubuntu/Linux**, dan **Windows**: Chrome asli kalau ada, Chromium sistem kalau
+tidak, browser bawaan Playwright sebagai jaring terakhir.
 
 | platform | status |
 |---|---|
 | Ubuntu / Linux | diuji: Python 3.12.3 aarch64, Chromium sistem + bundled, backend `file` dan `secret-tool` |
 | macOS | jalur lama dipertahankan apa adanya (Keychain, `/Applications/Google Chrome.app`) |
+| Windows | baru: Python 3.12/3.13, Chrome/Chromium instalasi standar atau bundled, backend `file` di `%LOCALAPPDATA%` — jalur kode diverifikasi lewat simulasi platform, belum diuji di mesin Windows asli |
 
 ## Postur keamanan
 
@@ -33,6 +34,10 @@ Yang sengaja **tidak** dipakai:
   container, SSH tanpa sesi desktop), backend jatuh ke **file 0600** di dalam
   data dir 0700 — lebih lemah dari keyring, karena itu `run.sh --check`,
   `/healthz`, dan log boot selalu menyebut backend yang benar-benar dipakai.
+  Windows tidak punya CLI keyring bawaan, jadi di sana backend selalu **file**
+  di `%LOCALAPPDATA%\GaiConsole`; mode POSIX tidak berlaku, proteksinya
+  adalah ACL profil user (hanya user pemilik + admin yang bisa membaca
+  LocalAppData-nya sendiri), dan `describe()` menyebutnya apa adanya.
 - `pyotp` → TOTP RFC 6238 ditulis dengan `hmac`+`base64` stdlib, diuji
   terhadap vektor RFC 6238 Appendix B (`tests/selftest.py`).
 - `email-validator` → regex sederhana, cukup untuk alamat Google.
@@ -43,14 +48,16 @@ Pengerasan lain:
 
 - `requirements.lock` di-pin penuh **dengan sha256**, dipasang lewat
   `pip install --require-hashes`. Lock memuat hash untuk **linux
-  (manylinux/musllinux x86_64+aarch64) dan darwin (arm64+x86_64)** sekaligus —
-  satu lock, dua OS: pip memilih artifact yang cocok untuk host lalu memeriksa
+  (manylinux/musllinux x86_64+aarch64), darwin (arm64+x86_64), dan windows
+  (win_amd64/win_arm64)** sekaligus —
+  satu lock, tiga OS: pip memilih artifact yang cocok untuk host lalu memeriksa
   hashnya. Tiap paket diberi komentar `# files:` yang menyebut cakupannya.
   Regenerasi: `tools/make_lock.py` (dari venv), `--from-lock` (tanpa venv),
   `--verify` (cocokkan lock dengan PyPI).
 - Console butuh token 43-char (`?t=` → cookie), dibandingkan constant-time.
   Tanpa token, daftar akun tidak bisa dibaca proses lokal lain.
-- Data dir `0700`; `db.sqlite3`, `console.token`, dan `vault.json` `0600`.
+- Data dir `0700`; `db.sqlite3`, `console.token`, dan `vault.json` `0600`
+  (di Windows ketiganya dilindungi ACL profil user, bukan mode POSIX).
 - Password, seed TOTP, nomor kartu, dan CVC **hanya** di vault (Keychain /
   Secret Service / file 0600). Tabel `accounts` menyimpan handle
   (`secret_ref`, `totp_ref`), bukan nilai.
@@ -104,6 +111,34 @@ headless tanpa sesi desktop, `secret-tool` ada tetapi setiap panggilan gagal
 GaiConsole mendeteksi itu lewat round-trip probe dan pindah ke backend file,
 bukan gagal saat menyimpan password pertama.
 
+### Windows
+
+Prasyarat: **Python 3.12+** dari [python.org](https://www.python.org/downloads/)
+(centang *py launcher* saat memasang) dan **Google Chrome** (atau Chromium).
+Tidak perlu Git Bash, WSL, atau Xvfb — browser jalan headed bawaan desktop
+Windows, dan tidak ada keyring CLI, jadi secret memakai backend file (lihat
+Postur keamanan).
+
+```powershell
+git clone https://github.com/danskiv/google-ai-pro-farming-2-years-copy
+cd google-ai-pro-farming-2-years-copy
+.\run.ps1 --check   # python, data dir, backend secret, browser (venv dibuat dulu kalau belum ada)
+.\run.ps1
+```
+
+`run.ps1` adalah padanan `run.sh`: membuat `.venv`, memasang dependensi
+hash-pinned dari `requirements.lock` yang sama, lalu menyajikan konsol di
+`127.0.0.1:8765` (`$env:PORT=9000; .\run.ps1` untuk port lain). `run.bat`
+hanya pembungkus tipis yang memanggil `run.ps1` (dengan bypass
+ExecutionPolicy sebatas proses itu) untuk yang lebih suka klik/Command
+Prompt. Tanpa Chrome/Chromium sistem, `run.ps1` memasang Chromium bawaan
+Playwright, sama seperti di Linux (`$env:GAI_SKIP_BROWSER_INSTALL=1` untuk
+melarangnya). Data dir Windows: `%LOCALAPPDATA%\GaiConsole`.
+
+Menjalankan sebagai service Windows (Task Scheduler / NSSM) belum dibungkus
+repo ini; jalankan `run.ps1` dari sesi user yang login supaya browser headed
+punya desktop.
+
 ## Jalankan
 
 ```bash
@@ -122,6 +157,7 @@ http://127.0.0.1:8765/?t=<isi token>
 |---|---|
 | macOS | `~/Library/Application Support/GaiConsole/console.token` |
 | Linux | `~/.local/share/GaiConsole/console.token` (ikut `$XDG_DATA_HOME`) |
+| Windows | `%LOCALAPPDATA%\GaiConsole\console.token` |
 
 Token juga dicetak di log saat boot. Tanpa token, daftar akun tidak bisa dibaca.
 
@@ -142,7 +178,7 @@ sesuaikan kalau repo di-clone ke nama lain.
 ## Variabel lingkungan
 
 Semua variabel ber-prefix `GAI_` dibaca `app/config.py`; `PORT` dan
-`GAI_SKIP_BROWSER_INSTALL` dibaca `run.sh`.
+`GAI_SKIP_BROWSER_INSTALL` dibaca `run.sh` / `run.ps1`.
 
 | variabel | arti |
 |---|---|
@@ -160,11 +196,13 @@ Semua variabel ber-prefix `GAI_` dibaca `app/config.py`; `PORT` dan
 | `GAI_MIRROR_CLIENTS2` | `1` kalau egress memblokir `clients2.google.com` — script pembayaran diambil dari mirror host Google Translate |
 | `GAI_MAX_CONCURRENT` | jumlah run paralel (default 1 — jangan dinaikkan tanpa ukur) |
 | `GAI_RUN_TIMEOUT` | batas detik satu run (default 900) |
-| `GAI_SKIP_BROWSER_INSTALL` | `1` untuk melarang `run.sh` mengunduh Chromium |
+| `GAI_SKIP_BROWSER_INSTALL` | `1` untuk melarang `run.sh`/`run.ps1` mengunduh Chromium |
 
 `auto` untuk browser berarti: Chrome di `/Applications` (macOS) atau
 `google-chrome`/`google-chrome-stable` di PATH → `channel="chrome"`; Chromium
-sistem/snap/`/opt` → `executable_path`; tidak ada keduanya → Chromium bawaan
+sistem/snap/`/opt` → `executable_path`; di Windows, `chrome.exe` dicari di
+lokasi instalasi standar (`%ProgramFiles%`, `%ProgramFiles(x86)%`,
+`%LocalAppData%`) → `executable_path`; tidak ada keduanya → Chromium bawaan
 Playwright (dengan fallback otomatis kalau channel yang diminta tidak ketemu).
 
 `auto` untuk headless berarti: ada `DISPLAY`/`WAYLAND_DISPLAY` → headed, tidak
@@ -219,7 +257,7 @@ langkah login (`signin/rejected`).
 ## Verifikasi
 
 ```bash
-.venv/bin/python tests/selftest.py     # 11 test: TOTP RFC, DB, vault, browser, lock
+.venv/bin/python tests/selftest.py     # 12 test: TOTP RFC, DB, vault, browser, lock
 python3 tools/make_lock.py --verify    # hash lock vs PyPI, tanpa venv
 ./run.sh --check                       # python, data dir, backend secret, browser
 curl -s localhost:8765/healthz         # {"ok":true,"secret_backend":…,"browser":…}
@@ -275,7 +313,7 @@ app/
   config.py        settings, data dir per-OS, token console
   db.py            skema SQLite + migrasi idempoten
   vault.py         akun & kartu (nilai di vault)
-  secrets.py       backend secret: security / secret-tool / file 0600
+  secrets.py       backend secret: security / secret-tool / file 0600 (Windows: file, ACL profil user)
   totp.py          TOTP stdlib
   egress.py        cek negara egress
   runner/          browser (resolusi channel/headless), navigasi, antrean
@@ -292,5 +330,5 @@ tasks/
 deploy/
   gai-console.service  unit systemd --user untuk Ubuntu
 tests/selftest.py
-tools/make_lock.py     lock multi-platform (linux+darwin) dari PyPI JSON
+tools/make_lock.py     lock multi-platform (linux+darwin+windows) dari PyPI JSON
 ```

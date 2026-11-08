@@ -302,7 +302,7 @@ async def ensure_card(page: Page, acc_id: str) -> bool:
     number = vault.secret_get(card["number_ref"])
     cvc = vault.secret_get(card["cvc_ref"])
     if not number or not cvc:
-        say("KARTU", "nomor/CVC tidak terbaca dari Keychain")
+        say("KARTU", "nomor/CVC tidak terbaca dari vault")
         return False
     exp = f"{card['exp_month']}{card['exp_year']}"
     say("KARTU", f"tempel {card['brand']}-{card['last4']} ke akun")
@@ -759,7 +759,7 @@ async def main() -> int:
         return 2
     acc_id, password, secret = creds
     if not password:
-        print(f"password kosong di Keychain untuk {email} ({acc_id}) — impor ulang akunnya",
+        print(f"password kosong di vault untuk {email} ({acc_id}) — impor ulang akunnya",
               flush=True)
         return 2
     print(f"akun {email} · {acc_id} · password {len(password)} char"

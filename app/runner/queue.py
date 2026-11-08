@@ -9,6 +9,7 @@ the UI tails.
 from __future__ import annotations
 
 import asyncio
+import os
 import sys
 import time
 from pathlib import Path
@@ -68,7 +69,13 @@ class Runner:
     async def stop(self) -> None:
         self.stopping = True
         if self.proc and self.proc.returncode is None:
-            self.proc.terminate()
+            if sys.platform == "win32":
+                # TerminateProcess hanya membunuh proses runner; driver
+                # Playwright dan Chrome di bawahnya jadi yatim dan mengunci
+                # profil. Bunuh seluruh pohon prosesnya.
+                await asyncio.to_thread(_kill_tree, self.proc.pid)
+            else:
+                self.proc.terminate()
             try:
                 await asyncio.wait_for(self.proc.wait(), timeout=15)
             except asyncio.TimeoutError:
@@ -92,7 +99,7 @@ class Runner:
 
         # A hard-killed Chrome leaves a lock beside the profile and the next launch
         # dies with "Opening in existing browser session".
-        for lock in ("SingletonLock", "SingletonCookie", "SingletonSocket"):
+        for lock in ("SingletonLock", "SingletonCookie", "SingletonSocket", "lockfile"):
             try:
                 (settings.profiles_dir / f"profile_{acc_id}" / lock).unlink(missing_ok=True)
             except OSError:
@@ -100,9 +107,12 @@ class Runner:
 
         log_path = settings.artifacts_dir / f"run_{acc_id}_{int(time.time())}.log"
         with open(log_path, "wb") as fh:
+            # Paksa UTF-8 di subprocess: di Windows stdout ke file memakai
+            # codepage lokal (cp1252) dan log alur penuh karakter non-ASCII.
             self.proc = await asyncio.create_subprocess_exec(
                 sys.executable, str(SCRIPT), email, "--from", str(start),
                 cwd=str(BASE), stdout=fh, stderr=asyncio.subprocess.STDOUT,
+                env={**os.environ, "PYTHONUTF8": "1", "PYTHONIOENCODING": "utf-8"},
             )
             await self.proc.wait()
 
@@ -116,6 +126,24 @@ class Runner:
             status = "failed"
         await db.execute("UPDATE accounts SET status = ? WHERE id = ?", (status, acc_id))
         self.current = None
+
+
+def _kill_tree(pid: int) -> None:
+    """Kill a process and its children, recursively (Windows stop path)."""
+    import psutil
+
+    try:
+        parent = psutil.Process(pid)
+    except psutil.NoSuchProcess:
+        return
+    procs = parent.children(recursive=True)
+    procs.append(parent)
+    for proc in procs:
+        try:
+            proc.kill()
+        except psutil.NoSuchProcess:
+            pass
+    psutil.wait_procs(procs, timeout=5)
 
 
 runner = Runner()

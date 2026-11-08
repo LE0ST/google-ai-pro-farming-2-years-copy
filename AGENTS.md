@@ -30,7 +30,7 @@ status cancel terverifikasi, kartu tidak tertinggal di akun.
 
 ## Prasyarat mesin
 
-- Python 3.11+, venv dibuat `run.sh`.
+- Python 3.12+, venv dibuat `run.sh` (Windows: `run.ps1`).
 - Egress internet dengan **negara US** (alur memverifikasi sendiri lewat
   ipwho.is dan berhenti kalau bukan US).
 - Mesin tanpa layar: pasang Xvfb. Google menolak login headless
@@ -44,14 +44,22 @@ status cancel terverifikasi, kartu tidak tertinggal di akun.
 
 ```bash
 ./run.sh --check                        # python, data dir, backend secret, browser
-.venv/bin/python tests/selftest.py      # harus 11/11
+.venv/bin/python tests/selftest.py      # harus 15/15
 ./run.sh                                # konsol di 127.0.0.1:8765
 curl -s localhost:8765/healthz          # {"ok":true,...}
 ```
 
+Di Windows pakai padanannya: `.\run.ps1 --check`, selftest
+`.venv\Scripts\python tests\selftest.py`, lalu `.\run.ps1`. Bedanya hanya di
+jalur platform: data dir `%LOCALAPPDATA%\GaiConsole`, backend secret selalu
+`file` (tidak ada CLI keyring bawaan; proteksi = ACL profil user), dan
+browser jalan headed bawaan — tidak perlu Xvfb. Chrome/Chromium dicari di
+lokasi instalasi standar Windows; tidak ada keduanya, Playwright bundled
+yang dipakai.
+
 Token konsol ada di file `console.token` di data dir
 (Linux: `~/.local/share/GaiConsole/`, macOS: `~/Library/Application
-Support/GaiConsole/`). Semua panggilan API memakai header
+Support/GaiConsole/`, Windows: `%LOCALAPPDATA%\GaiConsole\`). Semua panggilan API memakai header
 `X-Console-Token: <token>` atau query `?t=<token>`. Jangan tampilkan isinya.
 
 ## Isi data (lewat UI atau API)

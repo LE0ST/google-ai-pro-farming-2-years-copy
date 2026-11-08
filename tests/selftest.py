@@ -89,7 +89,9 @@ def test_file_backend_roundtrip_and_mode() -> None:
         assert secrets.exists(ref)
         path = settings.data_dir / "vault.json"
         assert path.exists(), path
-        assert path.stat().st_mode & 0o077 == 0, oct(path.stat().st_mode)
+        if sys.platform != "win32":
+            # Windows has no POSIX modes; the profile ACL is the protection.
+            assert path.stat().st_mode & 0o077 == 0, oct(path.stat().st_mode)
         secrets.delete(ref)
         assert secrets.get(ref) == ""
     finally:
@@ -101,6 +103,9 @@ def test_data_dir_follows_platform() -> None:
     assert path.name == "GaiConsole"
     if sys.platform == "darwin":
         assert "Library/Application Support" in path.as_posix()
+    elif sys.platform == "win32":
+        if not os.environ.get("LOCALAPPDATA"):
+            assert "AppData/Local" in path.as_posix(), path
     elif not os.environ.get("XDG_DATA_HOME"):
         assert path.as_posix().endswith(".local/share/GaiConsole"), path
 
@@ -124,6 +129,85 @@ def test_headless_resolution() -> None:
             os.environ["DISPLAY"] = saved_display
 
 
+def test_discover_today_resolves_zone() -> None:
+    """discover memuat ZoneInfo("America/Los_Angeles") saat diimpor.
+
+    Windows tidak punya database zona waktu IANA bawaan — tanpa paket
+    `tzdata` (dipin di pyproject + lock) impor ini meledak di sana dan
+    setiap run akun langsung mati.
+    """
+    from app.sites.google_one import discover
+
+    assert discover.today().isoformat()
+
+
+def _patched_win32(env: dict[str, str]):
+    """Patch sys.platform + env Windows untuk satu blok, pulihkan sesudahnya."""
+    saved_platform = sys.platform
+    saved_env = {k: os.environ.get(k) for k in env}
+    sys.platform = "win32"
+    os.environ.update(env)
+    return saved_platform, saved_env
+
+
+def _restore_win32(saved: tuple[str, dict[str, str | None]]) -> None:
+    platform, env = saved
+    sys.platform = platform
+    for key, value in env.items():
+        if value is None:
+            os.environ.pop(key, None)
+        else:
+            os.environ[key] = value
+
+
+def test_win32_data_dir_simulation() -> None:
+    """Di host mana pun: platform win32 + LOCALAPPDATA kustom -> data dir ikut."""
+    saved = _patched_win32({"LOCALAPPDATA": r"D:\Profil\Local"})
+    try:
+        path = _default_data_dir()
+        assert path.name == "GaiConsole"
+        assert str(path).replace("\\", "/").endswith("Profil/Local/GaiConsole"), path
+    finally:
+        _restore_win32(saved)
+
+
+def test_win32_browser_resolution_simulation() -> None:
+    """Di host mana pun: chrome.exe di pohon instalasi Windows palsu terpilih."""
+    root = Path(tempfile.mkdtemp(prefix="gai-win32-"))
+    chrome_exe = root / "Program Files" / "Google" / "Chrome" / "Application" / "chrome.exe"
+    chrome_exe.parent.mkdir(parents=True)
+    chrome_exe.write_bytes(b"")
+    chrome_exe.chmod(0o755)
+    saved = _patched_win32(
+        {
+            "PROGRAMFILES": str(root / "Program Files"),
+            "PROGRAMFILES(X86)": str(root / "Program Files (x86)"),
+            "LOCALAPPDATA": str(root / "Local"),
+        }
+    )
+    # shutil.which membaca sys.platform dan masuk jalur win32 yang butuh
+    # modul khusus Windows; di host non-Windows stub saja pencarian PATH-nya
+    # (yang diuji di sini penemuan dari pohon instalasi, bukan PATH).
+    saved_which = browser.shutil.which
+    browser.shutil.which = lambda _name: None
+    try:
+        choice = browser.resolve_browser()
+        assert choice == {"executable_path": str(chrome_exe)}, choice
+        assert browser.has_display() is True
+    finally:
+        browser.shutil.which = saved_which
+        _restore_win32(saved)
+
+
+def test_win_browser_paths_shape() -> None:
+    """Windows discovery is pure path building — shape-check it on any host."""
+    chrome, chromium = browser._win_browser_paths()
+    assert chrome and chromium
+    assert all(p.endswith("chrome.exe") for p in chrome + chromium)
+    assert all("Chrome" in p for p in chrome)
+    assert all("Chromium" in p for p in chromium)
+
+
 def test_browser_resolution_shape() -> None:
     choice = browser.resolve_browser()
     assert isinstance(choice, dict)
@@ -133,8 +217,8 @@ def test_browser_resolution_shape() -> None:
     assert "headless" in browser.describe() or "headed" in browser.describe()
 
 
-def test_lock_covers_linux() -> None:
-    """A darwin-only lock is what broke Linux installs; keep both platforms in it."""
+def test_lock_covers_platforms() -> None:
+    """A darwin-only lock is what broke Linux installs; keep all platforms in it."""
     lock = Path(__file__).resolve().parent.parent / "requirements.lock"
     text = lock.read_text(encoding="utf-8")
     assert "--hash=sha256:" in text
@@ -143,7 +227,7 @@ def test_lock_covers_linux() -> None:
     combined = " ".join(tags)
     assert "linux=" in combined, "lock pinned no linux wheels"
     assert "macos=" in combined, "lock pinned no macOS wheels"
-    assert "win" not in combined, "windows artifacts should not be pinned"
+    assert "windows=" in combined, "lock pinned no windows wheels"
 
 
 def main() -> int:
