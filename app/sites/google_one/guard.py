@@ -8,8 +8,8 @@ money that is not due today ("then $19.99/month, starting <date>"), so a bare
 "any $0.00 anywhere" test is not enough either way: it used to pass a dialog
 that charged $199.99 today next to a $0.00 tax line. Amounts anchored to a
 due-today label decide first. Unanchored non-zero amounts then pass in two
-tiers of evidence: when the dialog itself shows today is free (a zero amount,
-or a free/trial word), it is enough that every price is future-scoped; with
+tiers of evidence: when the dialog itself shows today's amount is zero, it is
+enough that every other price is future-scoped; with
 no such evidence (the "Upcoming charges" shape of layers 2-4) every price
 must be preceded by an explicit start marker ("starting", "then", "after").
 A bare billing period is not a deferral: "$19.99/month · Billed monthly" is
@@ -40,17 +40,29 @@ TODAY_LABEL = re.compile(
     r"today'?s\s+(?:total|charge)|total\s+due|tagihan\s+hari\s+ini)",
     re.IGNORECASE,
 )
-# Konteks yang membuat nominal bukan-nol jelas harga masa depan, bukan tagihan
-# hari ini: tarif berkala, tanggal mulai, perpanjangan.
-_FUTURE_HINT = re.compile(
-    r"/\s?(?:month|mo|year|yr)\b|per\s+(?:month|year)|starting|starts\s+on|"
-    r"then\b|after\s+(?:the\s+)?(?:trial|free)|renews|renewal|mulai\s+tanggal",
+# Explicit temporal qualifiers that can establish when an amount applies.
+_FUTURE_PREFIX_HINT = re.compile(
+    r"starting|starts\s+on|then\b|after\s+(?:the\s+)?(?:trial|free)|mulai\s+tanggal",
     re.IGNORECASE,
 )
-# Penanda mulai masa depan yang *eksplisit*: nominal yang didahului kata ini
-# belum ditagih karena masa harganya belum mulai ("Starting May 8, 2027
-# $13.99"). Lebih ketat dari _FUTURE_HINT: satuan berkala (/month, /year)
-# dan "renews" tidak termasuk — itu siklus tagihan biasa, bukan penundaan.
+_FUTURE_SUFFIX_HINT = re.compile(
+    r"starting|starts\s+on|after\s+(?:the\s+)?(?:trial|free)|renews|renewal|mulai\s+tanggal",
+    re.IGNORECASE,
+)
+_RECURRING_RATE = re.compile(
+    r"/\s?(?:month|mo|year|yr)\b|per\s+(?:month|year)", re.IGNORECASE
+)
+_CLAUSE_BOUNDARY = re.compile(r"[·•;|]|[.!?](?=\s)")
+_CHARGE_LABEL = re.compile(
+    r"\b(?:activation\s+fee|(?:processing|service|convenience)\s+fee|fee|"
+    r"tax(?:es)?|amount\s+due|due\s+today|total\s+today|charged\s+today|"
+    r"pay\s+today|today'?s\s+(?:total|charge))\b",
+    re.IGNORECASE,
+)
+_LABEL_TO_AMOUNT = re.compile(r"^[\s:=,-]*(?:(?:of|is)\s+)?$", re.IGNORECASE)
+_AMOUNT_TO_LABEL = re.compile(r"^[\s,:=-]*$")
+# An explicit start marker before an amount is stronger evidence than a
+# recurring period or renewal label, neither of which establishes deferral.
 _START_HINT = re.compile(
     r"starting|starts\s+on|then\b|after\b|mulai\s+tanggal",
     re.IGNORECASE,
@@ -118,9 +130,72 @@ def _today_amounts(flat: str, hits: list[tuple[int, int, str]]) -> list[str]:
     return found
 
 
-def _future_scoped(flat: str, hit: tuple[int, int, str]) -> bool:
+def _clause_span(flat: str, position: int) -> tuple[int, int]:
+    """Return the separator-bounded text segment containing `position`."""
+    start, end = 0, len(flat)
+    for separator in _CLAUSE_BOUNDARY.finditer(flat):
+        if separator.end() <= position:
+            start = separator.end()
+        elif separator.start() >= position:
+            end = separator.start()
+            break
+    return start, end
+
+
+def _has_unpriced_charge_label(
+    flat: str, hits: list[tuple[int, int, str]]
+) -> bool:
+    """Fail closed when a charge-bearing label has no nearby amount in its clause."""
+    for label in _CHARGE_LABEL.finditer(flat):
+        if _NEGATED.search(flat[max(0, label.start() - 30):label.start()]):
+            continue
+        clause_start, clause_end = _clause_span(flat, label.start())
+        clause_hits = [h for h in hits if clause_start <= h[0] < clause_end]
+        before = [h for h in clause_hits if h[1] <= label.start()]
+        after = [h for h in clause_hits if h[0] >= label.end()]
+        if before and _AMOUNT_TO_LABEL.fullmatch(flat[before[-1][1]:label.start()]):
+            continue
+        if after and _LABEL_TO_AMOUNT.fullmatch(flat[label.end():after[0][0]]):
+            continue
+        return True
+    return False
+
+
+def _future_scoped(
+    flat: str,
+    hit: tuple[int, int, str],
+    hits: list[tuple[int, int, str]] | None = None,
+) -> bool:
     start, end, _raw = hit
-    return bool(_FUTURE_HINT.search(flat[max(0, start - 48):end + 48]))
+    if hits is None:
+        hits = [(m.start(), m.end(), m.group(0)) for m in MONEY.finditer(flat)]
+    index = hits.index(hit)
+    clause_start, clause_end = _clause_span(flat, start)
+    previous = hits[index - 1] if index else None
+    next_hit = hits[index + 1] if index + 1 < len(hits) else None
+    before_start = max(clause_start, previous[1] if previous else clause_start)
+    after_end = min(clause_end, next_hit[0] if next_hit else clause_end)
+    before = flat[before_start:start]
+    after = flat[end:after_end]
+
+    # A previous recurring amount may carry its own start-date suffix. Do not
+    # reuse that suffix for the next amount; an explicit later "then" starts a
+    # new price. A start marker after a non-recurring component can still
+    # introduce the current amount (for example, an itemised upcoming total).
+    if previous and before_start == previous[1] and not _is_zero(previous[2]):
+        rate = _RECURRING_RATE.search(before)
+        if rate:
+            then_markers = [
+                marker
+                for marker in re.finditer(r"\bthen\b", before, re.IGNORECASE)
+                if marker.start() > rate.start()
+            ]
+            before = before[then_markers[-1].start():] if then_markers else ""
+
+    return bool(
+        _FUTURE_PREFIX_HINT.search(before)
+        or _FUTURE_SUFFIX_HINT.search(after)
+    )
 
 
 def _start_scoped(flat: str, hit: tuple[int, int, str]) -> bool:
@@ -190,39 +265,41 @@ def _components_explain(
 
 
 def judge(text: str) -> Verdict:
-    flat = " ".join(text.split())
+    flat = " ".join(re.sub(r"[\r\n]+", " · ", text).split())
     if not flat:
         return Verdict(False, [], "modal kosong / tak terbaca")
     hits = [(m.start(), m.end(), m.group(0)) for m in MONEY.finditer(flat)]
     amounts = [h[2] for h in hits]
 
+    if _has_unpriced_charge_label(flat, hits):
+        return Verdict(False, amounts, "label biaya tidak memiliki nominal yang terbaca")
+
     today = _today_amounts(flat, hits)
     if today:
         if any(not _is_zero(a) for a in today):
             return Verdict(False, amounts, "tagihan hari ini bukan nol")
-        return Verdict(True, amounts, "total hari ini nol")
+        nonzero = [h for h in hits if not _is_zero(h[2])]
+        if not nonzero:
+            return Verdict(True, amounts, "total hari ini nol")
+        if all(_future_scoped(flat, h, hits) for h in nonzero):
+            return Verdict(True, amounts, "total hari ini nol; harga lain terikat ke masa depan")
+        return Verdict(False, amounts, "ada biaya tambahan tanpa waktu masa depan yang jelas")
 
     if not amounts:
-        if FREE_WORD.search(flat):
-            return Verdict(True, amounts, "tidak ada nominal, ada kata free/trial")
         return Verdict(False, amounts, "tidak ada nominal yang bisa dibaca")
 
     nonzero = [h for h in hits if not _is_zero(h[2])]
     if not nonzero:
         return Verdict(True, amounts, "terbaca total nol")
-    # Tanpa tambatan hari ini, nominal bukan-nol hanya lolos sebagai harga
-    # masa depan — dalam dua tingkat bukti:
-    #   Tier A: dialog memuat bukti hari ini gratis (ada nominal nol, atau
-    #     kata free/trial). Cukup setiap nominal terikat konteks masa depan
-    #     (_FUTURE_HINT, termasuk satuan berkala & "renews").
-    #   Tier B: tanpa nol dan tanpa kata free — bentuk "Upcoming charges"
-    #     layer 2-4. Setiap nominal wajib didahului penanda mulai eksplisit
-    #     (_start_scoped); satuan berkala saja tidak cukup, karena dialog
-    #     berbayar polos pun berbentuk "$19.99/month · Billed monthly".
+    # Without a due-today amount, positive prices pass only with future
+    # evidence. With a zero amount, each positive price needs its own explicit
+    # temporal qualifier. Without a zero amount or free wording (the "Upcoming
+    # charges" shape), each positive price needs an explicit start marker;
+    # a recurring period alone does not establish deferral.
     nonzero_idx = [i for i, h in enumerate(hits) if not _is_zero(h[2])]
     has_free_evidence = len(nonzero_idx) < len(hits) or bool(FREE_WORD.search(flat))
     if has_free_evidence:
-        scoped = [_future_scoped(flat, h) for h in hits]
+        scoped = [_future_scoped(flat, h, hits) for h in hits]
         if all(scoped[i] for i in nonzero_idx):
             return Verdict(True, amounts, "nominal bukan nol hanya harga masa depan")
     else:

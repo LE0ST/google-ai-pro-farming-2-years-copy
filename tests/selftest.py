@@ -386,6 +386,99 @@ def test_lock_covers_platforms() -> None:
     assert "windows=" in combined, "lock pinned no windows wheels"
 
 
+def test_guard_rejects_unclassified_positive_charge() -> None:
+    from app.sites.google_one import guard
+
+    verdict = guard.judge("Due today $0.00 · Activation fee $5.00")
+    assert verdict.safe is False, verdict
+
+
+def test_guard_rejects_trial_without_verifiable_amount() -> None:
+    from app.sites.google_one import guard
+
+    verdict = guard.judge("Start your free trial")
+    assert verdict.safe is False, verdict
+
+
+def test_guard_checkout_price_boundaries() -> None:
+    from app.sites.google_one import guard
+
+    cases = [
+        ("Due today $0.00", True),
+        ("Due today $19.99", False),
+        ("Due today $19.99 · Tax $0.00", False),
+        ("Due today $0.00 · Then $19.99/month starting Jan 2028", True),
+        ("", False),
+        (
+            "Due today $0.00 · Activation fee $5.00 · Then $19.99/month starting Jan 2028",
+            False,
+        ),
+    ]
+    for text, expected in cases:
+        verdict = guard.judge(text)
+        assert verdict.safe is expected, (text, verdict)
+
+
+def test_guard_future_suffix_does_not_scope_later_tax() -> None:
+    from app.sites.google_one import guard
+
+    text = "Due today $0.00 · Then $19.99/month starting Jan 2028 · Tax $5.00"
+    verdict = guard.judge(text)
+    assert verdict.safe is False, verdict
+
+
+def test_guard_future_suffix_does_not_scope_later_fee() -> None:
+    from app.sites.google_one import guard
+
+    text = "Due today $0.00 · Then $19.99/month starting Jan 2028 · Activation fee $5.00"
+    verdict = guard.judge(text)
+    assert verdict.safe is False, verdict
+
+
+def test_guard_rejects_unpriced_charge_label() -> None:
+    from app.sites.google_one import guard
+
+    verdict = guard.judge("Due today $0.00 · Activation fee")
+    assert verdict.safe is False, verdict
+
+
+def test_guard_future_context_boundaries() -> None:
+    from app.sites.google_one import guard
+
+    cases = [
+        ("Activation fee $5.00 · Then $19.99/month starting Jan 2028", False),
+        ("Due today $0.00 · Tax $0.00 · Then $19.99/month starting Jan 2028", True),
+        ("Due today $0.00 · Then $19.99/month starting Jan 2028 · Tax $0.00", True),
+        ("Due today $0.00 · Then $19.99/month starting Jan 2028. Tax $5.00", False),
+        (
+            "Due today $0.00 · Then $19.99/month starting Jan 2028"
+            " · Then €29,99/month starting Jan 2029",
+            True,
+        ),
+        ("Activation fee · Due today $0.00", False),
+        ("$0.00 · Activation fee · Then $19.99/month starting Jan 2028", False),
+    ]
+    for text, expected in cases:
+        verdict = guard.judge(text)
+        assert verdict.safe is expected, (text, verdict)
+
+
+def test_guard_currency_decimal_boundaries() -> None:
+    from app.sites.google_one import guard
+
+    cases = [
+        ("Due today €0,00", True),
+        ("Due today €19,99", False),
+        ("Due today Rp0,00", True),
+        ("Due today $0.00 · Then €19,99/month starting Jan 2028", True),
+        ("Due today $0.00 · Tax €5,00", False),
+        ("Due today $0.00 · Tax €0,00", True),
+    ]
+    for text, expected in cases:
+        verdict = guard.judge(text)
+        assert verdict.safe is expected, (text, verdict)
+
+
 def main() -> int:
     failures = 0
     for name, fn in sorted(globals().items()):
