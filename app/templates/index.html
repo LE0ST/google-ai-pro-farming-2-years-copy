@@ -1,0 +1,552 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>GaiConsole</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root {
+    --line:#e3e3e6; --line-soft:#eeeef1; --muted:#6b6b73; --ink:#16161a;
+    --bg:#fafafb; --panel:#fff; --accent:#16161a;
+    --ok-bg:#e7f6ea; --ok-fg:#1c6b2c;
+    --bad-bg:#fde8e6; --bad-fg:#a3231b;
+    --warn-bg:#fff8dc; --warn-line:#efe0a8;
+    --radius:8px; --radius-sm:6px;
+  }
+  * { box-sizing:border-box; }
+  html { color-scheme: light; }
+  body {
+    font:13px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    margin:0; color:var(--ink); background:var(--bg);
+    -webkit-font-smoothing:antialiased;
+  }
+  code, .mono, textarea, pre { font-family:ui-monospace, "SF Mono", Menlo, monospace; }
+
+  /* ── header ─────────────────────────────────────────────────────────── */
+  header {
+    position:sticky; top:0; z-index:10;
+    padding:.75rem 1.2rem; border-bottom:1px solid var(--line);
+    display:flex; gap:.75rem; align-items:center; flex-wrap:wrap;
+    background:rgba(255,255,255,.85); backdrop-filter:saturate(180%) blur(12px);
+  }
+  h1 { font-size:15px; margin:0; letter-spacing:-.01em; }
+  h1 span { color:var(--muted); font-weight:400; }
+  .stats { display:flex; gap:.4rem; align-items:center; color:var(--muted); font-size:12px; }
+  .dot {
+    width:7px; height:7px; border-radius:50%; background:#c6c6cd;
+    display:inline-block; transition:background .3s, box-shadow .3s;
+  }
+  .dot.busy { background:#1c6b2c; box-shadow:0 0 0 3px rgba(28,107,44,.15); animation:pulse 1.6s ease-in-out infinite; }
+  @keyframes pulse { 50% { box-shadow:0 0 0 6px rgba(28,107,44,0); } }
+  .sep { color:#d5d5da; }
+  .spacer { flex:1; }
+
+  /* ── controls ───────────────────────────────────────────────────────── */
+  button, .btn {
+    font:12px inherit; padding:.4rem .7rem; border:1px solid var(--line);
+    background:#f4f4f6; border-radius:var(--radius-sm); cursor:pointer;
+    white-space:nowrap; color:inherit; line-height:1.4;
+    transition:background .12s, border-color .12s, opacity .12s, transform .06s;
+  }
+  button:hover:not(:disabled), .btn:hover { background:#ececf0; }
+  button:active:not(:disabled) { transform:translateY(1px); }
+  button.primary { background:var(--accent); color:#fff; border-color:var(--accent); }
+  button.primary:hover:not(:disabled) { background:#2c2c33; border-color:#2c2c33; }
+  button.danger { color:var(--bad-fg); }
+  button.danger:hover:not(:disabled) { background:var(--bad-bg); border-color:#f2cdc9; }
+  button:disabled { opacity:.45; cursor:default; }
+  button[data-busy] { opacity:.6; cursor:progress; }
+  :focus-visible { outline:2px solid #16161a; outline-offset:1px; border-radius:var(--radius-sm); }
+
+  input {
+    font:12px inherit; padding:.4rem .5rem; border:1px solid var(--line);
+    border-radius:var(--radius-sm); min-width:0; background:#fff; color:inherit;
+  }
+  input:focus { border-color:#a9a9b2; }
+  input.grow { flex:1; }
+  textarea {
+    width:100%; font-size:12px; line-height:1.5; min-height:74px;
+    border:1px solid var(--line); border-radius:var(--radius-sm);
+    padding:.5rem; resize:vertical; background:#fff; color:inherit;
+  }
+  textarea:focus { border-color:#a9a9b2; }
+  .row { display:flex; gap:.4rem; margin:.5rem 0; flex-wrap:wrap; }
+  .row > input { min-width:7rem; }
+
+  /* ── layout ─────────────────────────────────────────────────────────── */
+  main {
+    display:grid; grid-template-columns:1.55fr 1fr; gap:1rem;
+    padding:1rem 1.2rem 2rem; align-items:start;
+  }
+  @media (max-width:900px) { main { grid-template-columns:1fr; } }
+  section {
+    background:var(--panel); border:1px solid var(--line);
+    border-radius:var(--radius); padding:.9rem;
+  }
+  h2 { font-size:13px; margin:0 0 .5rem; letter-spacing:-.005em; }
+  .hint { color:var(--muted); font-size:11px; margin:.2rem 0 .6rem; line-height:1.5; }
+
+  /* ── banner ─────────────────────────────────────────────────────────── */
+  .banner {
+    margin:.75rem 1.2rem 0; padding:.5rem .8rem; border-radius:var(--radius-sm);
+    display:flex; align-items:center; gap:.6rem; font-size:12px;
+    animation:slide .22s ease-out;
+  }
+  .banner.ok  { background:var(--warn-bg); border:1px solid var(--warn-line); }
+  .banner.bad { background:var(--bad-bg); border:1px solid #f2cdc9; color:var(--bad-fg); }
+  .banner button {
+    margin-left:auto; background:none; border:none; padding:0 .3rem;
+    color:inherit; opacity:.5; font-size:14px; line-height:1;
+  }
+  .banner button:hover { opacity:1; background:none; }
+  @keyframes slide { from { opacity:0; transform:translateY(-4px); } }
+
+  /* ── table ──────────────────────────────────────────────────────────── */
+  .scroll { overflow-x:auto; margin-top:.6rem; }
+  table { width:100%; border-collapse:collapse; font-size:12px; table-layout:fixed; }
+  th, td { text-align:left; padding:.4rem .45rem; border-bottom:1px solid var(--line-soft); vertical-align:top; }
+  tbody tr:last-child td { border-bottom:none; }
+  tbody tr { transition:background .15s; }
+  tbody tr:hover { background:#fcfcfd; }
+  tbody tr.running { background:#f6fbf7; }
+  tbody tr.failed  { background:#fffafa; }
+  th { color:var(--muted); font-weight:500; white-space:nowrap; }
+  td.email { word-break:break-all; }
+  td.actions { white-space:nowrap; text-align:right; }
+  td.actions form { display:inline; }
+  td.actions button { padding:.25rem .5rem; font-size:11px; }
+  .empty { color:var(--muted); padding:1rem .45rem; text-align:center; }
+
+  /* ── status pill ────────────────────────────────────────────────────── */
+  .pill {
+    display:inline-block; font-size:11px; padding:.05rem .4rem;
+    border-radius:999px; background:#eee; white-space:nowrap;
+  }
+  .pill.active, .pill.subscribed { background:var(--ok-bg); color:var(--ok-fg); }
+  .pill.dead, .pill.failed       { background:var(--bad-bg); color:var(--bad-fg); }
+  .pill.active_needs_verification { background:#fff4cc; color:#654c00; }
+  .pill.running                  { background:#e4eefb; color:#1b4f8f; }
+  .pill.pending                  { background:#f0eff5; color:#5b5670; }
+  .pill.cancelled                { background:#f2f2f4; color:var(--muted); }
+
+  /* ── otp cell ───────────────────────────────────────────────────────── */
+  .otp { display:flex; flex-direction:column; gap:.25rem; min-width:5.5rem; }
+  .otp .v { font-size:12px; letter-spacing:.06em; font-variant-numeric:tabular-nums; }
+  .bar { height:3px; background:var(--line-soft); border-radius:2px; overflow:hidden; }
+  .bar i { display:block; height:100%; background:#1c6b2c; border-radius:2px;
+           transition:width .9s linear; }
+  .bar.warn i { background:#b8761b; }
+  .bar.crit i { background:var(--bad-fg); }
+
+  /* ── reveal ─────────────────────────────────────────────────────────── */
+  .pw { display:inline-flex; align-items:center; gap:.35rem; }
+  .pw code { min-width:4.5rem; display:inline-block; word-break:break-all; }
+  .reveal { padding:.15rem .4rem; font-size:11px; }
+
+  code { font-size:12px; }
+
+  /* ── log ────────────────────────────────────────────────────────────── */
+  .logwrap {
+    margin:0 1.2rem 2rem; background:var(--panel); border:1px solid var(--line);
+    border-radius:var(--radius); padding:.9rem;
+  }
+  .loghead { display:flex; align-items:center; gap:.6rem; }
+  .loghead h2 { margin:0; }
+  pre#log {
+    margin:.6rem 0 0; font-size:11px; line-height:1.45; max-height:300px;
+    overflow:auto; white-space:pre-wrap; word-break:break-word;
+    color:#2b2b31; background:#fbfbfc; border:1px solid var(--line-soft);
+    border-radius:var(--radius-sm); padding:.6rem; overscroll-behavior:contain;
+  }
+  pre#log:empty::before { content:"(belum ada run)"; color:var(--muted); }
+  .spin { display:inline-block; animation:spin 1s linear infinite; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+
+  @media (prefers-reduced-motion:reduce) {
+    *, *::before, *::after { animation:none !important; transition:none !important; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>GaiConsole <span>— vault</span></h1>
+  <div class="stats">
+    <span class="dot {{ 'busy' if current or pending else '' }}" id="dot"></span>
+    <span id="q">{% if current %}jalan: {{ current }}{% elif pending %}{{ pending }} antre{% else %}idle{% endif %}</span>
+    <span class="sep">·</span>
+    <span>{{ accounts|length }} akun · {{ cards|length }} kartu</span>
+  </div>
+  <span class="spacer"></span>
+  <form method="post" action="/queue/run-all">
+    <button type="submit">jalankan semua</button>
+  </form>
+  <form method="post" action="/queue/stop">
+    <button class="danger" type="submit">stop</button>
+  </form>
+</header>
+
+{% if msg %}<div class="banner ok" role="status">{{ msg }}<button type="button" data-x aria-label="tutup">×</button></div>{% endif %}
+{% if err %}<div class="banner bad" role="alert">{{ err }}<button type="button" data-x aria-label="tutup">×</button></div>{% endif %}
+
+<main>
+  <section>
+    <h2>Akun</h2>
+    <p class="hint">Tempel satu per baris: <code>email|password|secret-totp</code>. Seed disimpan di vault (Keychain/Secret Service/file 0600), yang tampil hanya kodenya.</p>
+    <form method="post" action="/accounts/import">
+      <textarea name="blob" placeholder="demo@example.invalid|<test-password>|<test-totp-seed>"></textarea>
+      <div class="row"><button class="primary" type="submit">Impor</button></div>
+    </form>
+    <form method="post" action="/accounts/add">
+      <div class="row">
+        <input class="grow" name="email" placeholder="email" required autocomplete="off">
+        <input class="grow" name="password" placeholder="password" required autocomplete="off">
+        <input class="grow" name="seed" placeholder="secret TOTP (opsional)" autocomplete="off">
+        <button type="submit">Tambah</button>
+      </div>
+    </form>
+
+    <div class="scroll">
+    <table>
+      <colgroup>
+        <col style="width:26%"><col style="width:20%"><col style="width:14%">
+        <col style="width:15%"><col style="width:14%"><col style="width:11%">
+      </colgroup>
+      <thead>
+        <tr><th>email</th><th>password</th><th>otp</th><th>kartu</th><th>status</th><th></th></tr>
+      </thead>
+      <tbody>
+      {% for a in accounts %}
+      <tr data-acc="{{ a.id }}" class="{{ a.status }}">
+        <td class="email">{{ a.email }}</td>
+        <td>
+          <span class="pw">
+            <code data-pw="{{ a.id }}">••••••</code>
+            <button type="button" class="reveal" data-reveal="{{ a.id }}"
+                    aria-label="lihat password {{ a.email }}">lihat</button>
+          </span>
+        </td>
+        <td>
+          {% if a.has_totp %}
+          <div class="otp">
+            <code class="v" data-code="{{ a.id }}">{{ a.code }}</code>
+            <span class="bar"><i data-bar="{{ a.id }}" style="width:{{ (a.left / 30 * 100)|round|int }}%"></i></span>
+          </div>
+          {% else %}<span class="muted">—</span>{% endif %}
+        </td>
+        <td>
+          {% if a.card %}<span class="pill {{ a.card_status }}">{{ a.card }}</span>
+          {% else %}<span class="muted">belum</span>{% endif %}
+        </td>
+        <td>
+          <span class="pill {{ a.status }}" data-status="{{ a.id }}">{{ 'Active — stage needs verification' if a.status == 'active_needs_verification' else a.status }}</span>
+          <span class="muted" data-step="{{ a.id }}">{% if a.step %} · {{ a.step }}{% endif %}</span>
+          <span class="muted" data-msg="{{ a.id }}">{{ a.message }}</span>
+        </td>
+        <td class="actions">
+          <button type="button" data-diagnose="{{ a.id }}">Diagnose Subscription</button>
+          <form method="post" action="/accounts/{{ a.id }}/run">
+            <button type="submit" data-run="{{ a.id }}" {% if a.status == 'running' or a.status == 'subscribed' %}disabled{% endif %}>jalankan</button>
+          </form>
+          <form method="post" action="/accounts/{{ a.id }}/delete"
+                data-confirm="hapus {{ a.email }}?">
+            <button class="danger" type="submit">hapus</button>
+          </form>
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="6" class="empty">belum ada akun</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    </div>
+  </section>
+
+  <section>
+    <h2>Kartu</h2>
+    <p class="hint">Tempel satu per baris: <code>nomor|MM/YY|CVC</code>. Nomor &amp; CVC ke vault (Keychain/Secret Service/file 0600); yang tampil hanya 4 digit terakhir. Rotasi bergilir ke kartu aktif yang paling lama tidak dipakai.</p>
+    <form method="post" action="/cards/import">
+      <textarea name="blob" placeholder="4111111111111111|08/29|123"></textarea>
+      <div class="row"><button class="primary" type="submit">Impor</button></div>
+    </form>
+    <form method="post" action="/cards/add">
+      <div class="row">
+        <input class="grow" name="number" placeholder="nomor kartu" required autocomplete="off" inputmode="numeric">
+        <input name="exp" placeholder="MM/YY" size="7" required autocomplete="off">
+        <input name="cvc" placeholder="CVC" size="5" required autocomplete="off" inputmode="numeric">
+        <button type="submit">Tambah</button>
+      </div>
+    </form>
+
+    <div class="scroll">
+    <table>
+      <colgroup>
+        <col style="width:30%"><col style="width:18%"><col style="width:18%"><col style="width:16%"><col style="width:18%">
+      </colgroup>
+      <thead>
+        <tr><th>kartu</th><th>exp</th><th>dipakai</th><th>status</th><th></th></tr>
+      </thead>
+      <tbody>
+      {% for c in cards %}
+      <tr>
+        <td><code>{{ c.label }}</code></td>
+        <td>{{ c.exp }}</td>
+        <td>{{ c.used }} akun</td>
+        <td><span class="pill {{ c.status }}">{{ c.status }}</span></td>
+        <td class="actions">
+          <form method="post" action="/cards/{{ c.id }}/status">
+            {% if c.status == 'active' %}
+            <input type="hidden" name="dead" value="1">
+            <button class="danger" type="submit" data-confirm="matikan {{ c.label }}? akun yang memakainya akan dilepas.">matikan</button>
+            {% else %}
+            <input type="hidden" name="dead" value="0">
+            <button type="submit">hidupkan</button>
+            {% endif %}
+          </form>
+          <form method="post" action="/cards/{{ c.id }}/delete"
+                data-confirm="hapus kartu {{ c.label }}?">
+            <button class="danger" type="submit">hapus</button>
+          </form>
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="5" class="empty">belum ada kartu</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    </div>
+  </section>
+</main>
+
+<section class="logwrap">
+  <h2>Subscription diagnosis</h2>
+  <label><input type="checkbox" id="diagnostic-screenshot"> Save a fully masked screenshot on failure</label>
+  <pre id="diagnostic-result" aria-live="polite">Select an account to run a read-only diagnosis.</pre>
+</section>
+<section class="logwrap">
+  <div class="loghead">
+    <h2>Log run</h2>
+    <span class="muted" id="logwho"></span>
+    <span class="spacer"></span>
+    <span class="muted" id="logstat"></span>
+    <button type="button" id="follow" aria-pressed="true">auto-scroll: on</button>
+  </div>
+  <pre id="log" tabindex="0"></pre>
+</section>
+
+<script>
+(() => {
+  "use strict";
+  const $  = (sel) => document.querySelector(sel);
+  const by = (attr, id) => document.querySelector(`[${attr}="${id}"]`);
+
+  document.addEventListener("click", async (ev) => {
+    const btn = ev.target.closest("[data-diagnose]");
+    if (!btn) return;
+    const id = btn.dataset.diagnose;
+    const output = $("#diagnostic-result");
+    btn.disabled = true;
+    try {
+      const body = new URLSearchParams();
+      body.set("screenshot", $("#diagnostic-screenshot").checked ? "true" : "false");
+      const start = await fetch(`/accounts/${encodeURIComponent(id)}/diagnose`, {method: "POST", body});
+      const started = await start.json();
+      if (!start.ok) throw new Error(started.error || `HTTP ${start.status}`);
+      output.textContent = `Diagnostic running for ${id}...`;
+      for (;;) {
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        const response = await fetch(`/api/diagnosis/${encodeURIComponent(id)}`, {cache: "no-store"});
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const result = await response.json();
+        if (result.status !== "running") { output.textContent = JSON.stringify(result, null, 2); break; }
+      }
+    } catch (error) { output.textContent = `Diagnostic failed: ${error.message}`; }
+    finally { btn.disabled = false; }
+  });
+
+  /* ── dismissible banners ───────────────────────────────────────────── */
+  document.addEventListener("click", (ev) => {
+    if (ev.target.closest("[data-x]")) {
+      ev.target.closest(".banner").remove();
+      history.replaceState(null, "", location.pathname);
+    }
+  });
+
+  /* ── confirm-on-submit (replaces inline onsubmit) ──────────────────── */
+  document.addEventListener("submit", (ev) => {
+    const form = ev.target;
+    if (!(form instanceof HTMLFormElement)) return;
+    const ask = form.dataset.confirm;
+    if (ask && !confirm(ask)) { ev.preventDefault(); return; }
+    const btn = ev.submitter;
+    if (btn) { btn.dataset.busy = "1"; btn.disabled = true; }
+  });
+
+  /* ── password reveal ───────────────────────────────────────────────── */
+  document.addEventListener("click", async (ev) => {
+    const btn = ev.target.closest("[data-reveal]");
+    if (!btn) return;
+    const id = btn.dataset.reveal;
+    const cell = by("data-pw", id);
+    if (!cell) return;
+
+    if (btn.dataset.shown === "1") {
+      cell.textContent = "••••••";
+      btn.dataset.shown = "0";
+      btn.textContent = "lihat";
+      return;
+    }
+    btn.dataset.busy = "1";
+    try {
+      const res = await fetch(`/api/secret/${encodeURIComponent(id)}`);
+      if (!res.ok) throw new Error(String(res.status));
+      cell.textContent = (await res.json()).password;
+      btn.dataset.shown = "1";
+      btn.textContent = "sembunyi";
+    } catch {
+      cell.textContent = "(gagal)";
+    } finally {
+      delete btn.dataset.busy;
+    }
+  });
+
+  /* ── state polling ─────────────────────────────────────────────────── */
+  const logEl = $("#log");
+  const qEl = $("#q");
+  const dotEl = $("#dot");
+  const whoEl = $("#logwho");
+  const statEl = $("#logstat");
+  const followBtn = $("#follow");
+
+  let follow = true, lastLogSize = -1, lastWho = null, failures = 0, timer = null;
+
+  followBtn.addEventListener("click", () => {
+    follow = !follow;
+    followBtn.textContent = `auto-scroll: ${follow ? "on" : "off"}`;
+    followBtn.setAttribute("aria-pressed", String(follow));
+    if (follow) logEl.scrollTop = logEl.scrollHeight;
+  });
+  // Scrolling away by hand turns follow off, so the log stops yanking the view.
+  logEl.addEventListener("scroll", () => {
+    const atBottom = logEl.scrollHeight - logEl.scrollTop - logEl.clientHeight < 24;
+    if (atBottom !== follow) {
+      follow = atBottom;
+      followBtn.textContent = `auto-scroll: ${follow ? "on" : "off"}`;
+      followBtn.setAttribute("aria-pressed", String(follow));
+    }
+  });
+
+  function paintLog(text, who, running) {
+    if (who !== lastWho) {
+      whoEl.textContent = who ? `· ${who}` : "";
+      lastWho = who;
+      lastLogSize = -1;
+      logEl.textContent = "";
+    }
+    if (text.length === lastLogSize) return;      // unchanged: leave the DOM alone
+    lastLogSize = text.length;
+    logEl.textContent = text;                      // full replace keeps it simple and safe
+    statEl.textContent = running ? "" : "(selesai)";
+    if (follow) logEl.scrollTop = logEl.scrollHeight;
+  }
+
+  function paintCodes(codes) {
+    for (const [id, v] of Object.entries(codes)) {
+      const c = by("data-code", id);
+      const b = by("data-bar", id);
+      if (!c) continue;
+      if (c.textContent !== v.code) c.textContent = v.code;
+      if (b) {
+        const pct = Math.round((v.left / 30) * 100);
+        b.style.width = `${pct}%`;
+        const bar = b.parentElement;
+        bar.classList.toggle("crit", v.left <= 5);
+        bar.classList.toggle("warn", v.left > 5 && v.left <= 10);
+      }
+    }
+  }
+
+  function paintRows(rows) {
+    for (const [id, v] of Object.entries(rows)) {
+      const tr = by("data-acc", id);
+      if (!tr) continue;
+      if (tr.dataset.status !== v.status) {
+        tr.dataset.status = v.status;
+        tr.className = v.status;
+      }
+      const pill = by("data-status", id);
+      if (pill) {
+        pill.textContent = v.status === 'active_needs_verification' ? 'Active — stage needs verification' : v.status;
+        pill.className = 'pill ' + v.status;
+      }
+      const runBtn = by("data-run", id);
+      if (runBtn) runBtn.disabled = (v.status === "running" || v.status === "subscribed");
+      const step = by("data-step", id);
+      if (step) {
+        const want = v.step ? ` · ${v.step}` : "";
+        if (step.dataset.v !== want) { step.dataset.v = want; step.textContent = want; }
+      }
+      const msg = by("data-msg", id);
+      if (msg) {
+        const plan = v.itinerary;
+        const op = v.operation;
+        const visual = v.visual_evidence || {};
+        const conflict = visual.confirmed_promo_months && plan && plan.automatic_promo_months != null && visual.confirmed_promo_months !== plan.automatic_promo_months;
+        const wantMsg = (v.message || "") + (plan && plan.next_action ? ` | Next: ${plan.next_action} (${plan.phase}; ${plan.completed_queries} read-only queries); Plan changing: ${plan.plan_change_pending ? 'observed' : 'not observed'}; pending checks: ${(plan.pending_checks || []).join(', ')}; blocked: ${(plan.blocked_operations || []).join(', ')} ${plan.blocked_reason || ''}` : "")
+          + (plan ? ` | Checks performed: ${(plan.checks_performed || []).join(', ')}; link search: ${plan.link_search_result || 'not examined'}; blockers: ${(plan.blockers || []).map(b => b.reason).join('; ')}; change details: ${JSON.stringify(plan.plan_changes || [])}` : "")
+          + (visual.confirmed_promo_months ? ` | User-confirmed visual promotional duration: ${visual.confirmed_promo_months} months (not automatically verified)${conflict ? '; CONFLICT with automatic evidence' : ''}` : '')
+          + (plan ? ` | Subscription: ${['active_unknown_date', 'active_known_duration', 'active_known_date'].includes(plan.subscription_status) ? 'active (observed)' : (plan.subscription_status || 'unknown')}; bundle next payment: ${plan.bundle_next_payment_date || 'unknown'}; individual renewal: ${plan.primary_renewal_unknown ? 'not automatically verified' : 'see diagnosis'}` : '')
+          + (op ? ` | GaiConsole pending operation: ${op.pending_operation ? 'yes' : 'no'}; Operation: ${op.phase}; verified layers: ${op.verified_layers.join(', ') || 'none'}; pending layers: ${op.pending_layers.join(', ') || 'none'} ${op.reason}` : "");
+        if (msg.textContent !== wantMsg) msg.textContent = wantMsg;
+      }
+    }
+  }
+
+  async function tick() {
+    let data;
+    try {
+      const res = await fetch("/api/state", { cache: "no-store" });
+      if (!res.ok) throw new Error(String(res.status));
+      data = await res.json();
+      failures = 0;
+    } catch {
+      if (++failures === 3) {                      // only speak up on a real outage
+        dotEl.className = "dot";
+        qEl.textContent = "koneksi terputus";
+      }
+      return;
+    }
+
+    const running = Boolean(data.current || data.pending);
+    dotEl.className = `dot ${running ? "busy" : ""}`;
+    qEl.textContent = data.current
+      ? `jalan: ${data.current}`
+      : data.pending ? `${data.pending} antre` : "idle";
+
+    paintCodes(data.codes);
+    paintRows(data.accounts);
+    paintLog(data.log || "", data.current, running);
+
+    // Idle costs one request every 6s; a live run polls at 1s.
+    const want = running ? 1000 : 6000;
+    if (want !== interval) { interval = want; restart(); }
+  }
+
+  let interval = 2000;
+  function restart() {
+    if (timer) clearInterval(timer);
+    timer = setInterval(tick, interval);
+  }
+
+  // A background tab does not need to poll; catch up on return.
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) { if (timer) clearInterval(timer); timer = null; }
+    else if (!timer) { tick(); restart(); }
+  });
+
+  tick();
+  restart();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,26 @@
+[project]
+name = "google-ai-pro-farming-2-years"
+version = "0.1.0"
+description = "Local multi-account browser automation console"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.115",
+    "python-multipart>=0.0.9",
+    "uvicorn>=0.30",
+    "jinja2>=3.1",
+    "pydantic>=2.8",
+    "pydantic-settings>=2.4",
+    "aiosqlite>=0.20",
+    "psutil>=6.0",
+    "playwright>=1.48",
+    # Windows tidak punya database zona waktu IANA bawaan; zoneinfo memuatnya
+    # dari paket ini. Di Linux/macOS paketnya tidak terpakai tapi tidak rugi.
+    "tzdata>=2024.1",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "ASYNC"]

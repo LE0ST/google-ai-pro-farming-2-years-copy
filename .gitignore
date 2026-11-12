@@ -1,0 +1,25 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+
+# Local data and diagnostics (keep outside the repository)
+*.sqlite3
+*.sqlite3-wal
+*.sqlite3-shm
+artifacts/
+profiles/
+console.token
+vault.json
+vault.json*.tmp
+vault.json.lock
+.wheelhouse/
+.env
+.env.*
+!.env.example
+*.log
+
+# macOS
+.DS_Store
+._*
