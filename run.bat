@@ -1,5 +1,4 @@
 @echo off
-rem Pembungkus tipis: semua logika ada di run.ps1 (padanan run.sh).
-rem Bypass ExecutionPolicy hanya untuk proses ini -- tidak mengubah sistem.
+rem Start the local read-only diagnostics console through the PowerShell wrapper.
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0run.ps1" %*
 exit /b %ERRORLEVEL%

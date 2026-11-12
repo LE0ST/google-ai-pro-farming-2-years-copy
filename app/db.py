@@ -1,12 +1,8 @@
-"""SQLite store. Schema migrations are idempotent and versioned.
-
-Secrets never land here: password, TOTP seed and card number/CVC are Keychain
-handles. Everything that is merely *about* an account is a column.
-"""
+"""Minimal SQLite store for read-only subscription diagnostics."""
 
 from __future__ import annotations
 
-import time
+import stat
 from contextlib import asynccontextmanager
 from typing import Any, AsyncIterator
 
@@ -14,65 +10,27 @@ import aiosqlite
 
 from .config import settings
 
-SCHEMA_VERSION = 2
-
+# A distinct version prevents legacy upstream schemas (including v1) from being
+# mistaken for the minimal public read-only database.
+SCHEMA_VERSION = 100
 _DDL = """
-CREATE TABLE IF NOT EXISTS accounts (
-    id              TEXT PRIMARY KEY,
-    email           TEXT NOT NULL UNIQUE,
-    secret_ref      TEXT NOT NULL,
-    recovery_email  TEXT NOT NULL DEFAULT '',
-    totp_ref        TEXT NOT NULL DEFAULT '',
-    status          TEXT NOT NULL DEFAULT 'pending',
-    step            INTEGER NOT NULL DEFAULT 0,
-    step_message    TEXT NOT NULL DEFAULT '',
-    expiry_date     TEXT NOT NULL DEFAULT '',
-    egress_override TEXT NOT NULL DEFAULT '',
-    created_at      INTEGER NOT NULL,
-    updated_at      INTEGER NOT NULL
+CREATE TABLE accounts (
+    id TEXT PRIMARY KEY,
+    email TEXT NOT NULL UNIQUE,
+    status TEXT NOT NULL DEFAULT 'ready',
+    step INTEGER NOT NULL DEFAULT 0,
+    step_message TEXT NOT NULL DEFAULT '',
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL
 );
-
 """
-
-# v2: cards as a rotating pool. The account line format is email|password|totp,
-# the card line format is number|MM/YY|cvc, so number and CVC live in Keychain
-# and only last4/expiry are columns.
-_DDL_V2 = """
-CREATE TABLE IF NOT EXISTS cards (
-    id           TEXT PRIMARY KEY,
-    number_ref   TEXT NOT NULL,
-    cvc_ref      TEXT NOT NULL,
-    last4        TEXT NOT NULL,
-    brand        TEXT NOT NULL DEFAULT 'Card',
-    exp_month    TEXT NOT NULL,
-    exp_year     TEXT NOT NULL,
-    status       TEXT NOT NULL DEFAULT 'active',
-    last_used_at INTEGER NOT NULL DEFAULT 0,
-    created_at   INTEGER NOT NULL
-);
-
-CREATE INDEX IF NOT EXISTS idx_cards_rotation ON cards(status, last_used_at);
-"""
-
-
-def _ts() -> int:
-    return int(time.time())
-
-
-async def connect() -> aiosqlite.Connection:
-    conn = await aiosqlite.connect(settings.db_path)
-    conn.row_factory = aiosqlite.Row
-    await conn.execute("PRAGMA journal_mode=WAL")
-    await conn.execute("PRAGMA foreign_keys=ON")
-    await conn.execute("PRAGMA busy_timeout=5000")
-    return conn
 
 
 @asynccontextmanager
 async def _conn() -> AsyncIterator[aiosqlite.Connection]:
-    """aiosqlite starts its worker thread in connect(); `async with` on the
-    connection would start it a second time. Own the close explicitly."""
-    conn = await connect()
+    conn = await aiosqlite.connect(settings.db_path)
+    conn.row_factory = aiosqlite.Row
+    await conn.execute("PRAGMA busy_timeout=5000")
     try:
         yield conn
     finally:
@@ -80,33 +38,35 @@ async def _conn() -> AsyncIterator[aiosqlite.Connection]:
 
 
 async def migrate() -> None:
+    """Create a fresh schema and refuse legacy transaction-capable databases."""
     settings.ensure_dirs()
     async with _conn() as conn:
-        await conn.execute("CREATE TABLE IF NOT EXISTS schema_meta (version INTEGER NOT NULL)")
-        cur = await conn.execute("SELECT version FROM schema_meta")
-        row = await cur.fetchone()
-        version = row["version"] if row else 0
-
-        if version < 1:
+        tables = {
+            row["name"]
+            for row in await (await conn.execute(
+                "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'"
+            )).fetchall()
+        }
+        if "schema_meta" not in tables and tables:
+            raise RuntimeError(
+                "This data directory contains an unversioned database; "
+                "choose a new empty GAI_DATA_DIR."
+            )
+        if "schema_meta" not in tables:
+            await conn.execute("CREATE TABLE schema_meta (version INTEGER NOT NULL)")
+        row = await (await conn.execute("SELECT version FROM schema_meta LIMIT 1")).fetchone()
+        version = int(row["version"]) if row else 0
+        if version not in {0, SCHEMA_VERSION}:
+            raise RuntimeError(
+                "This data directory belongs to another GaiConsole schema; "
+                "choose a new empty GAI_DATA_DIR."
+            )
+        if version == 0:
             await conn.executescript(_DDL)
-        if version < 2:
-            await conn.executescript(_DDL_V2)
-            cols = {r["name"] for r in await (await conn.execute("PRAGMA table_info(accounts)")).fetchall()}
-            if "card_id" not in cols:
-                await conn.execute("ALTER TABLE accounts ADD COLUMN card_id TEXT NOT NULL DEFAULT ''")
-                await conn.execute("CREATE INDEX IF NOT EXISTS idx_accounts_card ON accounts(card_id)")
-
-        if version < SCHEMA_VERSION:
-            if row:
-                await conn.execute("UPDATE schema_meta SET version = ?", (SCHEMA_VERSION,))
-            else:
-                await conn.execute("INSERT INTO schema_meta (version) VALUES (?)", (SCHEMA_VERSION,))
-            await conn.commit()
-
-    # Sekali saat boot saja (dulu: setiap connect()). File DB berisi metadata
-    # akun; wal/shm ikut turunan mode-nya.
+            await conn.execute("INSERT INTO schema_meta (version) VALUES (?)", (SCHEMA_VERSION,))
+        await conn.commit()
     try:
-        settings.db_path.chmod(0o600)
+        settings.db_path.chmod(stat.S_IRUSR | stat.S_IWUSR)
     except OSError:
         pass
 

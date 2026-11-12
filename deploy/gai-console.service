@@ -1,24 +1,17 @@
 [Unit]
-Description=GaiConsole — konsol lokal otomasi AI Pro
-Documentation=https://github.com/danskiv/google-ai-pro-farming-2-years-copy
+Description=GaiConsole read-only subscription diagnostics
+Documentation=https://github.com/LE0ST/google-ai-pro-farming-2-years-copy
 After=network-online.target
 Wants=network-online.target
 
 [Service]
 Type=simple
-WorkingDirectory=%h/google-ai-pro-farming-2-years-copy
-# PORT bebas dipilih; token dan data ikut ke ~/.local/share/GaiConsole.
-Environment=PORT=8765
-Environment=GAI_SECRET_BACKEND=auto
-# Browser harus jalan headed (Google menolak login headless), jadi display
-# disediakan Xvfb lewat xvfb-run dan GAI_HEADLESS dimatikan. Bukan headless.
-Environment=GAI_HEADLESS=0
-ExecStart=/usr/bin/xvfb-run -a %h/google-ai-pro-farming-2-years-copy/run.sh
+WorkingDirectory=%h/gai-console-read-only
+Environment=GAI_BIND_HOST=127.0.0.1
+Environment=GAI_BIND_PORT=8765
+ExecStart=%h/gai-console-read-only/.venv/bin/python -m uvicorn app.main:app --host 127.0.0.1 --port 8765 --log-level warning
 Restart=on-failure
 RestartSec=5
-
-# Jangan pakai PrivateTmp di sini: socket X dari xvfb-run dan file kunci
-# profil browser hidup di /tmp dan harus terlihat konsisten antar-proses.
 NoNewPrivileges=yes
 
 [Install]

@@ -1,7 +1,7 @@
 [project]
-name = "google-ai-pro-farming-2-years"
+name = "gaiconsole-read-only-diagnostics"
 version = "0.1.0"
-description = "Local multi-account browser automation console"
+description = "Local read-only subscription diagnostics console"
 requires-python = ">=3.12"
 dependencies = [
     "fastapi>=0.115",
@@ -13,8 +13,7 @@ dependencies = [
     "aiosqlite>=0.20",
     "psutil>=6.0",
     "playwright>=1.48",
-    # Windows tidak punya database zona waktu IANA bawaan; zoneinfo memuatnya
-    # dari paket ini. Di Linux/macOS paketnya tidak terpakai tapi tidak rugi.
+    # Supplies the IANA time-zone database on Windows.
     "tzdata>=2024.1",
 ]
 

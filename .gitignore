@@ -4,7 +4,7 @@ __pycache__/
 *.pyc
 *.pyo
 
-# Data lokal (semua di luar repo, dijaga kalau pernah disalin ke sini)
+# Local data and diagnostics (keep outside the repository)
 *.sqlite3
 *.sqlite3-wal
 *.sqlite3-shm
@@ -16,6 +16,9 @@ vault.json*.tmp
 vault.json.lock
 .wheelhouse/
 .env
+.env.*
+!.env.example
+*.log
 
 # macOS
 .DS_Store
